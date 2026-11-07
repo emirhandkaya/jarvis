@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks'
 import { useSettings, setSetting } from '../../db/repo/settings'
 import { useCheckin } from '../../db/repo/checkins'
+import { useWeekReviewed } from '../../db/repo/reviews'
 import { useNow } from '../../ui/useNow'
 import { dayPrompt, isMinimumDay } from '../../logic/checkin'
 import { needsBackupReminder } from '../../logic/backup'
@@ -62,8 +63,8 @@ export function TodayPage() {
   const settings = useSettings()
   const [editing, setEditing] = useState(false)
 
-  // Haftalık değerlendirme ekranı Plan 5'te gelecek; şimdilik hep "yapıldı".
-  const prompt = dayPrompt(now, checkin, true)
+  const reviewed = useWeekReviewed(today)
+  const prompt = dayPrompt(now, checkin, reviewed ?? true)
   const ids = orderCards(ALL_IDS, settings?.cardOrder ?? [], settings?.hiddenCards ?? [])
   const dateLabel = dayDate(today).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })
 
