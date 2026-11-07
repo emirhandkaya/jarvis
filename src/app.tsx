@@ -11,6 +11,8 @@ import { KapanisPage } from './features/checkin/KapanisPage'
 import { FocusPage } from './features/focus/FocusPage'
 import { StudyPage } from './features/study/StudyPage'
 import { CourseDetail } from './features/study/CourseDetail'
+import { GymPage } from './features/gym/GymPage'
+import { WorkoutPage } from './features/gym/WorkoutPage'
 import { TimerTicker } from './features/focus/TimerTicker'
 import { UpdateBanner } from './ui/UpdateBanner'
 import './styles/ui.css'
@@ -27,8 +29,8 @@ function Screen({ route }: { route: Route }) {
     case 'odak': return <FocusPage />
     case 'ders': return <StudyPage />
     case 'dersDetay': return <CourseDetail id={route.params.id} />
-    case 'spor':
-    case 'sporYeni': return <ComingSoon name="Spor" />
+    case 'spor': return <GymPage />
+    case 'sporYeni': return <WorkoutPage />
     case 'aliskanlik': return <ComingSoon name="Alışkanlıklar" />
     case 'istatistik': return <ComingSoon name="İstatistik" />
     case 'degerlendirme': return <ComingSoon name="Haftalık değerlendirme" />
