@@ -105,6 +105,7 @@ export interface Block extends Base {
   title: string
   kind: 'ders' | 'spor' | 'is' | 'mola' | 'diger'
   refId?: string
+  skipDates?: string[]
 }
 export interface HealthDay {
   date: string
