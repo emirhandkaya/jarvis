@@ -1,7 +1,8 @@
 import { useRoute, type Route } from './router'
 import { NavBar } from './ui/NavBar'
 import { MenuPage } from './features/menu/MenuPage'
-import { ComingSoon } from './features/placeholder/ComingSoon'
+import { StatsPage } from './features/stats/StatsPage'
+import { ReviewPage } from './features/review/ReviewPage'
 import { TasksPage } from './features/tasks/TasksPage'
 import { GoalsPage } from './features/goals/GoalsPage'
 import { CheckinPage } from './features/checkin/CheckinPage'
@@ -35,8 +36,8 @@ function Screen({ route }: { route: Route }) {
     case 'spor': return <GymPage />
     case 'sporYeni': return <WorkoutPage />
     case 'aliskanlik': return <HabitsPage />
-    case 'istatistik': return <ComingSoon name="İstatistik" />
-    case 'degerlendirme': return <ComingSoon name="Haftalık değerlendirme" />
+    case 'istatistik': return <StatsPage />
+    case 'degerlendirme': return <ReviewPage />
     case 'ayarlar': return <SettingsPage />
     case 'importHealth': return <ImportHealthPage />
   }

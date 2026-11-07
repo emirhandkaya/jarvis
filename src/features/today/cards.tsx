@@ -27,6 +27,8 @@ import { HabitCheck } from '../habits/HabitCheck'
 import { DELOAD_NOTE } from '../gym/GymPage'
 import { useBlocksOn } from '../../db/repo/blocks'
 import { currentOrNext, nowMinutes, toMin } from '../../logic/blocks'
+import { useStatsInput } from '../../db/repo/stats'
+import { buildDayRecords, computeInsights } from '../../logic/insights'
 
 export interface CardDef { id: string; title: string; Component: () => JSX.Element | null }
 
@@ -207,7 +209,15 @@ function Blok() {
   return <Card title="Zaman bloğu" onClick={() => navigate('/plan')}>{text}</Card>
 }
 
-// Sonraki planlar buraya kart ekler.
+function Icgoru() {
+  const { today } = useNow()
+  const input = useStatsInput()
+  if (!input) return null
+  const first = computeInsights(buildDayRecords(input, today, 60), input.sessions, today)[0]
+  if (!first) return null
+  return <Card title="İçgörü" onClick={() => navigate('/istatistik')}>{first.text}</Card>
+}
+
 export const CARDS: CardDef[] = [
   { id: 'oncelikler', title: 'Öncelikler', Component: Oncelikler },
   { id: 'gorevler', title: 'Görevler', Component: Gorevler },
@@ -219,4 +229,5 @@ export const CARDS: CardDef[] = [
   { id: 'spor', title: 'Spor', Component: Spor },
   { id: 'saglik', title: 'Sağlık', Component: Saglik },
   { id: 'blok', title: 'Zaman bloğu', Component: Blok },
+  { id: 'icgoru', title: 'İçgörü', Component: Icgoru },
 ]
