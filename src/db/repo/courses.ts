@@ -29,9 +29,10 @@ export async function updateCourse(id: string, patch: Partial<Course>): Promise<
 }
 
 export async function deleteCourse(id: string): Promise<void> {
-  await db.transaction('rw', db.courses, db.topics, async () => {
+  await db.transaction('rw', db.courses, db.topics, db.mockExams, async () => {
     const topics = await db.topics.where('courseId').equals(id).toArray()
     await db.topics.bulkPut(topics.map(t => touch({ ...t, archived: true })))
+    await db.mockExams.where('courseId').equals(id).delete()
     await db.courses.delete(id)
   })
 }

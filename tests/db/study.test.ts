@@ -15,11 +15,13 @@ test('ders silinince konular arşivlenir, seanslar kalır, vadesi gelmez', async
   await db.topics.update(t1.id, { nextReviewDate: '2026-11-01' })
   await db.topics.update(t2.id, { nextReviewDate: '2026-11-01' })
   await db.focusSessions.add({ id: 's', createdAt: '', updatedAt: '', startedAt: '', endedAt: '', minutes: 25, mode: 'serbest', courseId: c.id, topicIds: [], recall: [] })
+  await db.mockExams.add({ id: 'm', createdAt: '', updatedAt: '', courseId: c.id, date: '2026-11-01', score: 50 })
   expect((await dueTopicsWithCourse('2026-11-07')).length).toBe(2)
   await deleteCourse(c.id)
   expect(await db.courses.count()).toBe(0)
   expect((await db.topics.toArray()).every(t => t.archived)).toBe(true)
   expect(await db.focusSessions.count()).toBe(1)
+  expect(await db.mockExams.count()).toBe(0)
   expect(await dueTopicsWithCourse('2026-11-07')).toEqual([])
 })
 test('sahipsiz konu vadeli görünmez', async () => {

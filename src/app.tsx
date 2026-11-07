@@ -11,6 +11,7 @@ import { KapanisPage } from './features/checkin/KapanisPage'
 import { FocusPage } from './features/focus/FocusPage'
 import { StudyPage } from './features/study/StudyPage'
 import { CourseDetail } from './features/study/CourseDetail'
+import { TimerTicker } from './features/focus/TimerTicker'
 import { UpdateBanner } from './ui/UpdateBanner'
 import './styles/ui.css'
 
@@ -42,6 +43,7 @@ export function App() {
     <>
       <Screen route={route} />
       <NavBar active={route.name} />
+      <TimerTicker />
       <UpdateBanner />
     </>
   )

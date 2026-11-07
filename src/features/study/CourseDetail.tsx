@@ -68,7 +68,7 @@ export function CourseDetail({ id }: { id: string }) {
           </form>
           {topics.length === 0 && <p class="muted">Henüz konu yok.</p>}
           {topics.map(t => {
-            const due = t.nextReviewDate !== undefined && t.nextReviewDate <= today
+            const due = !t.nextReviewDate || t.nextReviewDate <= today
             return (
               <div key={t.id} style="margin-bottom: 12px">
                 <div class="row">

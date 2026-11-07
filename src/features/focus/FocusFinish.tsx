@@ -16,6 +16,7 @@ export function FocusFinish({ timer, onBack }: Props) {
   const topics = useTopics(courseId)
   const [recall, setRecall] = useState(['', '', ''])
   const [ratings, setRatings] = useState<Record<string, Rating>>({})
+  const [busy, setBusy] = useState(false)
   const [result, setResult] = useState<string | null>(null)
 
   useEffect(() => {
@@ -25,6 +26,8 @@ export function FocusFinish({ timer, onBack }: Props) {
   }, [result])
 
   const save = async (skip: boolean) => {
+    if (busy) return
+    setBusy(true)
     const s = await finishTimer(new Date(), skip ? { recall: [], ratings: {} } : { recall, ratings })
     setResult(s ? `${s.minutes} dk kaydedildi` : '1 dakikadan kısa, kaydedilmedi.')
   }
@@ -50,8 +53,8 @@ export function FocusFinish({ timer, onBack }: Props) {
         </div>
       ))}
       <div class="row">
-        <Button class="grow" onClick={() => save(false)}>Kaydet</Button>
-        <Button variant="ghost" class="grow" onClick={() => save(true)}>Atla</Button>
+        <Button class="grow" disabled={busy} onClick={() => save(false)}>Kaydet</Button>
+        <Button variant="ghost" class="grow" disabled={busy} onClick={() => save(true)}>Atla</Button>
       </div>
       <Button variant="ghost" onClick={onBack}>Geri dön</Button>
     </div>

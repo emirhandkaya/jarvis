@@ -5,6 +5,7 @@ import { useTasks } from '../../db/repo/tasks'
 import { setSetting } from '../../db/repo/settings'
 import { startTimer } from '../../db/repo/focus'
 import type { ActiveTimer } from '../../logic/timer'
+import { unlockAudio } from '../../ui/alarm'
 import { Button } from '../../ui/Button'
 
 const MODES: [ActiveTimer['mode'], string][] = [['pomodoro', 'Pomodoro'], ['serbest', 'Serbest'], ['karisik', 'Karışık']]
@@ -28,6 +29,7 @@ export function FocusSetup({ lastCourseId }: { lastCourseId: string | null }) {
     else setTopicIds(cur => cur[0] === id ? [] : [id])
   }
   const start = async () => {
+    unlockAudio()
     if (courseId) await setSetting('lastFocusCourseId', courseId)
     await startTimer({
       mode, topicIds,

@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import { advance, currentTopic, isStale, remainingSec, type ActiveTimer, type Phase, type PomodoroCfg } from '../../logic/timer'
-import { discardTimer, pauseTimer, resumeTimer, saveTimer } from '../../db/repo/focus'
+import { discardTimer, pauseTimer, resumeTimer } from '../../db/repo/focus'
 import { useTopics } from '../../db/repo/topics'
-import { setTimerRunning } from '../../ui/UpdateBanner'
-import { beep, requestWakeLock, vibrate } from '../../ui/alarm'
+import { unlockAudio } from '../../ui/alarm'
 import { Button } from '../../ui/Button'
 import { Sheet } from '../../ui/Sheet'
 
@@ -12,53 +11,16 @@ const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${St
 
 interface Props { timer: ActiveTimer; cfg: PomodoroCfg; onFinish: () => void }
 
-export function FocusRunning({ timer, cfg, onFinish }: Props) {
-  const [now, setNow] = useState(() => new Date())
+export function FocusRunning({ timer: stored, cfg, onFinish }: Props) {
   const [staleDismissed, setStaleDismissed] = useState(false)
-  const topics = useTopics(timer.courseId)
-  const ref = useRef(timer)
-  ref.current = timer
-
+  const topics = useTopics(stored.courseId)
+  const [now, setNow] = useState(() => new Date())
   useEffect(() => {
-    setTimerRunning(true)
-    return () => setTimerRunning(false)
+    const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
   }, [])
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      const n = new Date()
-      setNow(n)
-      const { timer: next, finishedPhases } = advance(ref.current, n, cfg)
-      if (finishedPhases.length) {
-        ref.current = next
-        void saveTimer(next)
-        beep()
-        vibrate()
-      }
-    }, 1000)
-    return () => clearInterval(id)
-  }, [cfg.work, cfg.short, cfg.long, cfg.longEvery])
-
-  useEffect(() => {
-    if (timer.paused) return
-    let release: (() => void) | null = null
-    let dead = false
-    const acquire = async () => {
-      release?.()
-      release = null
-      const r = await requestWakeLock()
-      if (dead) r(); else release = r
-    }
-    const onVisible = () => { if (document.visibilityState === 'visible') void acquire() }
-    void acquire()
-    document.addEventListener('visibilitychange', onVisible)
-    return () => {
-      dead = true
-      document.removeEventListener('visibilitychange', onVisible)
-      release?.()
-    }
-  }, [timer.paused])
-
+  const timer = advance(stored, now, cfg).timer
   const topicId = currentTopic(timer)
   const topicName = topics?.find(t => t.id === topicId)?.name
   const sec = remainingSec(timer, now, cfg)
@@ -72,7 +34,7 @@ export function FocusRunning({ timer, cfg, onFinish }: Props) {
       <div class="focus-clock">{mmss(sec)}</div>
       {topicName && <div style="text-align: center">{topicName}</div>}
       <div class="row">
-        <Button variant="ghost" class="grow" onClick={() => timer.paused ? resumeTimer(new Date()) : pauseTimer(new Date())}>
+        <Button variant="ghost" class="grow" onClick={() => { if (timer.paused) { unlockAudio(); void resumeTimer(new Date()) } else void pauseTimer(new Date()) }}>
           {timer.paused ? 'Devam' : 'Duraklat'}
         </Button>
         <Button class="grow" onClick={onFinish}>Bitir</Button>

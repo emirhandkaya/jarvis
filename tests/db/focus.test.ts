@@ -40,3 +40,13 @@ test('kapalıyken biten fazlar sayılır: 10:00-10:40 = 35 dk', async () => {
   const s = await finishTimer(at(10, 40), { recall: [], ratings: {} })
   expect(s?.minutes).toBe(35)
 })
+
+test('eşzamanlı iki finishTimer tek seans kaydeder', async () => {
+  await startTimer({ mode: 'serbest', topicIds: [] }, at(10, 0))
+  const [a, b] = await Promise.all([
+    finishTimer(at(10, 30), { recall: [], ratings: {} }),
+    finishTimer(at(10, 30), { recall: [], ratings: {} }),
+  ])
+  expect([a, b].filter(Boolean).length).toBe(1)
+  expect(await db.focusSessions.count()).toBe(1)
+})

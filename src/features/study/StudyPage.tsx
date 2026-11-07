@@ -50,7 +50,7 @@ export function StudyPage() {
               <div class="row">
                 <span class="tag-dot" style={`background: ${c.color}`} />
                 <strong class="grow">{c.name}</strong>
-                {left !== null && <span class="muted">Sınava {left} gün</span>}
+                {left !== null && <span class="muted">{left === 0 ? 'Sınav bugün' : `Sınava ${left} gün`}</span>}
               </div>
               <div style="height: 8px; border-radius: 4px; background: var(--bg); margin: 8px 0 4px; overflow: hidden">
                 <div style={`height: 100%; width: ${pct}%; background: ${c.color}`} />

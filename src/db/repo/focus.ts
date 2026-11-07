@@ -50,30 +50,31 @@ export async function finishTimer(
   now: Date,
   review: { recall: string[]; ratings: Record<string, Rating> },
 ): Promise<FocusSession | null> {
-  const [t, settings] = await Promise.all([getActiveTimer(), getSettings()])
-  if (!t) return null
-  const sec = totalWorkSec(advance(t, now, settings.pomodoro).timer, now, settings.pomodoro)
-  const minutes = Math.round(sec / 60)
-  if (sec < 60 || minutes < 1) { await discardTimer(); return null }
-  const entries = Object.entries(review.ratings)
-  const session = newRecord<Omit<FocusSession, 'id' | 'createdAt' | 'updatedAt'>>({
-    startedAt: t.startedAt,
-    endedAt: now.toISOString(),
-    minutes,
-    mode: t.mode,
-    topicIds: t.topicIds,
-    ...(t.courseId ? { courseId: t.courseId } : {}),
-    ...(t.taskId ? { taskId: t.taskId } : {}),
-    recall: review.recall.map(r => r.trim()).filter(Boolean).slice(0, 3),
-    ...(entries.length ? { rating: entries[0][1] } : {}),
-  }) as FocusSession
-  await db.transaction('rw', [db.focusSessions, db.topics, db.courses, db.settings], async () => {
+  const settings = await getSettings()
+  return db.transaction('rw', [db.focusSessions, db.topics, db.courses, db.settings], async () => {
+    const t = await getActiveTimer()
+    if (!t) return null
+    const sec = totalWorkSec(advance(t, now, settings.pomodoro).timer, now, settings.pomodoro)
+    const minutes = Math.round(sec / 60)
+    if (sec < 60 || minutes < 1) { await discardTimer(); return null }
+    const entries = Object.entries(review.ratings)
+    const session = newRecord<Omit<FocusSession, 'id' | 'createdAt' | 'updatedAt'>>({
+      startedAt: t.startedAt,
+      endedAt: now.toISOString(),
+      minutes,
+      mode: t.mode,
+      topicIds: t.topicIds,
+      ...(t.courseId ? { courseId: t.courseId } : {}),
+      ...(t.taskId ? { taskId: t.taskId } : {}),
+      recall: review.recall.map(r => r.trim()).filter(Boolean).slice(0, 3),
+      ...(entries.length ? { rating: entries[0][1] } : {}),
+    }) as FocusSession
     await db.focusSessions.add(session)
     const day = todayStr(now)
     for (const [topicId, rating] of entries) await reviewTopic(topicId, rating, day)
     await discardTimer()
+    return session
   })
-  return session
 }
 
 export function useFocusSessions(): FocusSession[] | undefined {

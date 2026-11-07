@@ -13,7 +13,7 @@ import { useFocusSessions } from '../../db/repo/focus'
 import { useSettings } from '../../db/repo/settings'
 import { dayMinutes, nearestExam, weekMinutes } from '../../logic/study'
 import { weekStart } from '../../logic/dates'
-import { remainingSec } from '../../logic/timer'
+import { advance, remainingSec } from '../../logic/timer'
 import { navigate } from '../../router'
 import { ReviewChips } from '../study/ReviewChips'
 
@@ -100,7 +100,7 @@ function Sinav() {
   if (!next) return null
   return (
     <Card title="Sınav" onClick={() => navigate(`/ders/${next.course.id}`)}>
-      {next.course.name} sınavına {next.days} gün
+      {next.days === 0 ? `${next.course.name} sınavı bugün` : `${next.course.name} sınavına ${next.days} gün`}
     </Card>
   )
 }
@@ -119,9 +119,9 @@ function Odak() {
     return () => clearInterval(id)
   }, [!!timer])
   if (timer && settings) {
-    const s = remainingSec(timer, now, settings.pomodoro)
+    const s = remainingSec(advance(timer, now, settings.pomodoro).timer, now, settings.pomodoro)
     const mmss = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
-    return <Card title="Odak" onClick={() => navigate('/odak')}>Odak devam ediyor {mmss}</Card>
+    return <Card title="Odak" onClick={() => navigate('/odak')}>{timer.paused ? 'Duraklatıldı' : 'Odak devam ediyor'} {mmss}</Card>
   }
   return (
     <Card title="Odak" onClick={() => navigate('/odak')}>
