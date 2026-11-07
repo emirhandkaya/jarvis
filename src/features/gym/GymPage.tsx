@@ -8,6 +8,8 @@ import { Card } from '../../ui/Card'
 import { Button } from '../../ui/Button'
 import { Sparkline } from '../../ui/charts/Sparkline'
 import { useNow } from '../../ui/useNow'
+import { navigate } from '../../router'
+import { useSettings } from '../../db/repo/settings'
 import { StartPicker } from './StartPicker'
 import { TemplatesSheet } from './TemplatesSheet'
 import { fmtDate } from './format'
@@ -25,6 +27,9 @@ export function GymPage() {
   useExercises()
   useEffect(() => { void seedGymIfEmpty() }, [])
 
+  const settings = useSettings()
+  const openId = settings?.openWorkoutId ?? null
+  const open = useLiveQuery(async () => (openId ? !!(await db.workouts.get(openId)) : false), [openId])
   const status = useLiveQuery(() => gymStatus(today), [today])
   const volume = useLiveQuery(() => weeklyVolume(8, today), [today])
   const recent = useLiveQuery(async () => {
@@ -50,7 +55,9 @@ export function GymPage() {
           <div class="muted">{status?.lastWorkoutDate ? `Son antrenman: ${fmtDate(status.lastWorkoutDate)}` : 'Henüz antrenman yok.'}</div>
         </Card>
         {status?.deload && <p class="note">{DELOAD_NOTE[status.deload]}</p>}
-        <Button class="start-btn" onClick={() => setPicker(true)}>Antrenmana başla</Button>
+        {open
+          ? <Button class="start-btn" onClick={() => navigate('/spor/yeni')}>Antrenmana devam et</Button>
+          : <Button class="start-btn" onClick={() => setPicker(true)}>Antrenmana başla</Button>}
 
         <Card title="Haftalık hacim (8 hafta)">
           {volume && volume.some(v => v > 0) ? <Sparkline values={volume} width={240} height={48} /> : <p class="muted">Veri birikince burada görünür.</p>}

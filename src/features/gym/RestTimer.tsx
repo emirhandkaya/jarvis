@@ -24,7 +24,7 @@ export function RestTimer({ sec, onClose }: Props) {
     return () => { clearInterval(id); if (closer) clearTimeout(closer) }
   }, [end])
   return (
-    <div class="update-banner" role="timer" aria-live="off">
+    <div class="rest-timer" role="timer" aria-live="off">
       <strong>{left === 0 ? 'Dinlenme bitti' : `Dinlenme ${mmss(left)}`}</strong>
       <button type="button" class="btn btn-ghost" onClick={onClose}>Atla</button>
     </div>

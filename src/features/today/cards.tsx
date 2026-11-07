@@ -19,6 +19,7 @@ import { ReviewChips } from '../study/ReviewChips'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useHabitLogs, useHabits } from '../../db/repo/habits'
 import { gymStatus } from '../../db/repo/gym'
+import { db } from '../../db/schema'
 import { useHealth } from '../../db/repo/health'
 import { todayList } from '../../logic/habits'
 import { isMinimumDay } from '../../logic/checkin'
@@ -156,11 +157,18 @@ function Aliskanlik() {
 function Spor() {
   const { today } = useNow()
   const st = useLiveQuery(() => gymStatus(today), [today])
+  const openId = useSettings()?.openWorkoutId ?? null
+  // Açık (bitmemiş) antrenman "yapıldı" sayılmaz.
+  const doneToday = useLiveQuery(async () => {
+    const ws = await db.workouts.where('date').equals(today).toArray()
+    for (const w of ws) if (w.id !== openId && (await db.sets.where('workoutId').equals(w.id).count()) > 0) return true
+    return false
+  }, [today, openId])
   if (!st) return null
   return (
     <Card title="Spor">
       <div>Bu hafta {st.weekCount} / {st.target}</div>
-      {st.todayDone
+      {doneToday
         ? <div>Bugün antrenman yapıldı ✓</div>
         : <a class="btn btn-ghost" href="#/spor/yeni" style="display: inline-block; margin-top: 6px">Antrenmana başla</a>}
       {st.deload && <p class="note" style="margin: 8px 0 0">{DELOAD_NOTE[st.deload]}</p>}

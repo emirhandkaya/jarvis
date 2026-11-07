@@ -63,7 +63,7 @@ function ExerciseCard({ ex, workout, planned, sets, onLogged }: CardProps) {
       ))}
       {Array.from({ length: pending }, (_, i) => (
         <SetRow
-          key={`p${mine.length + i}`} done={false} step={ex.incrementKg}
+          key={`p${mine.length + i}-${lastDone?.id ?? ''}`} done={false} step={ex.incrementKg}
           kg={preKg === undefined ? '' : fmtKg(preKg)} reps={preReps === undefined ? '' : String(preReps)}
           onCommit={async (kg, reps) => {
             unlockAudio()
@@ -99,7 +99,7 @@ function Active({ workout, onFinished }: { workout: Workout; onFinished: (m: str
 
   return (
     <Page title={`${tpl?.name ?? 'Boş antrenman'}${workout.isDeload ? ' (hafif)' : ''}`}>
-      <div class="stack">
+      <div class="stack" style="padding-bottom: 96px">
         {order.map(o => {
           const ex = byId.get(o.id)
           return ex ? (

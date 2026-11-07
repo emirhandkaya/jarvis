@@ -5,7 +5,7 @@ interface Props {
   reps: string
   step: number
   done: boolean
-  onCommit?: (kg: number, reps: number) => void // bekleyen satır: ✓
+  onCommit?: (kg: number, reps: number) => void | Promise<void> // bekleyen satır: ✓
   onChange?: (kg: number, reps: number) => void // kayıtlı satır: düzenleme
   onDelete?: () => void
 }
@@ -36,6 +36,7 @@ function Stepper(p: { label: string; value: string; onSet: (v: string) => void; 
 export function SetRow({ kg: kg0, reps: reps0, step, done, onCommit, onChange, onDelete }: Props) {
   const [kg, setKg] = useState(kg0)
   const [reps, setReps] = useState(reps0)
+  const [busy, setBusy] = useState(false)
   const valid = okKg(num(kg)) && okReps(num(reps))
 
   const edit = (k: string, r: string) => {
@@ -54,8 +55,12 @@ export function SetRow({ kg: kg0, reps: reps0, step, done, onCommit, onChange, o
         <button type="button" class="btn btn-danger" style="min-width: 48px; min-height: 48px" aria-label="Seti sil" onClick={onDelete}>✕</button>
       ) : (
         <button
-          type="button" class="btn btn-primary" style="min-width: 56px; min-height: 56px" disabled={!valid} aria-label="Seti kaydet"
-          onClick={() => onCommit?.(num(kg), Math.round(num(reps)))}
+          type="button" class="btn btn-primary" style="min-width: 56px; min-height: 56px" disabled={!valid || busy} aria-label="Seti kaydet"
+          onClick={async () => {
+            if (busy) return
+            setBusy(true)
+            try { await onCommit?.(num(kg), Math.round(num(reps))) } finally { setBusy(false) }
+          }}
         >✓</button>
       )}
     </div>

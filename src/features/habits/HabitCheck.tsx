@@ -57,7 +57,7 @@ export function HabitCheck({ item, today }: { item: HabitItem; today: string }) 
         <div class="stack">
           <button type="button" class="btn btn-primary" onClick={() => apply('done')}>Yapıldı</button>
           <button type="button" class="btn btn-ghost" onClick={() => apply('min')}>Minimum yaptım{habit.minVersion ? `: ${habit.minVersion}` : ''}</button>
-          <button type="button" class="btn btn-ghost" onClick={() => apply('joker')}>Joker (bugünü sayma)</button>
+          {habit.schedule.type === 'days' && <button type="button" class="btn btn-ghost" onClick={() => apply('joker')}>Joker (bugünü sayma)</button>}
           <button type="button" class="btn btn-danger" onClick={() => apply(null)}>Temizle</button>
           {err && <p class="note" role="status">{err}</p>}
         </div>

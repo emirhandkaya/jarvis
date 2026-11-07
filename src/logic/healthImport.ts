@@ -64,9 +64,10 @@ export function decodeHealthParam(
   today: string,
 ): { ok: true; days: HealthPatch[]; dropped: number } | { ok: false; error: string } {
   let text = (d ?? '').trim()
-  if (/^%(7b|5b)/i.test(text)) {
-    try { text = decodeURIComponent(text) } catch { return { ok: false, error: ERR_READ } }
-  }
+  // Kısayollar %-kodlu / satır sonlu base64 üretebilir.
+  try { text = decodeURIComponent(text) } catch { /* ham haliyle dene */ }
+  text = text.trim()
+  if (!/^[{[]/.test(text)) text = text.replace(/\s+/g, '')
   if (!/^[{[]/.test(text)) {
     const dec = base64UrlToString(text)
     if (dec === null) return { ok: false, error: ERR_READ }

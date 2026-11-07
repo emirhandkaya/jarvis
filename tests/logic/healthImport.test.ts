@@ -91,3 +91,12 @@ test('adimlar kaynak basina toplanir, en buyuk kaynak alinir', () => {
   const r = aggregateExportLines([step('iPhone', 2000, '08'), step('iPhone', 3000, '09'), step('Watch', 5200, '08')])
   expect(r).toEqual([{ date: '2026-11-07', steps: 5200 }])
 })
+
+test('satir sonlu ve %-kodlu base64 cozulur', () => {
+  const enc = encodeHealthParam({ date: '2026-11-07', sleepMin: 420, steps: 8000, note: 'x'.repeat(120) })
+  const wrapped = enc.replace(/(.{76})/g, '$1\n')
+  const want = { ok: true, days: [{ date: '2026-11-07', sleepMin: 420, steps: 8000 }], dropped: 0 }
+  expect(decodeHealthParam(wrapped, TODAY)).toEqual(want)
+  expect(decodeHealthParam(enc.replace(/(.{76})/g, '$1%0A'), TODAY)).toEqual(want)
+  expect(decodeHealthParam(encodeURIComponent(wrapped) + '%0D%0A', TODAY)).toEqual(want)
+})

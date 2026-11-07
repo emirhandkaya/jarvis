@@ -71,7 +71,10 @@ export function HealthGuide() {
         <li>Kısayollar uygulamasında yeni bir kısayol oluştur.</li>
         <li>"Sağlık Örneklerini Bul" eylemini 5 kez ekle: Uyku Analizi, Adım, Aktif Enerji, Dinlenme Nabzı, Kalp Atış Hızı Değişkenliği. Hepsini dün / geçen gece için filtrele; toplam (adım, enerji, uyku) ya da ortalama (nabız, HRV) al.</li>
         <li>"Sözlük" eylemi ekle; anahtarlar: date, sleepMin, steps, activeKcal, restingHr, hrvMs.</li>
-        <li>"Base64 ile kodla" eylemini ekle.</li>
+        <li>
+          "Base64 ile kodla" eylemini ekle; Satır sonları: Yok. Değerler: date yyyy-MM-dd biçiminde ve uyanma gününü gösterir (bugün için boş bırakabilirsin);
+          sleepMin dakika cinsindendir; ondalıklarda virgül değil nokta kullan.
+        </li>
         <li>"URL'yi aç" eylemini ekle: https://jarvis.emirhandurmuskaya.com/#/import-health?d= ve sonuna kodlanmış metni ekle.</li>
         <li>Kişisel Otomasyon: her sabah seçtiğin saatte bu kısayolu çalıştır.</li>
       </ol>
