@@ -27,3 +27,9 @@ npm run deploy    # build + Cloudflare Pages'e yükle
 ## Telefonda kurulum
 
 Safari -> Paylaş -> Ana Ekrana Ekle. Ayarlar ekranındaki "iPhone Kısayolları" bölümünde Kısayollar için hazır adresler var.
+
+## GitHub Pages ile yayın
+
+`main` dalına her push'ta `.github/workflows/deploy.yml` testleri çalıştırır, build alır ve GitHub Pages'e yayınlar.
+Özel alan adı `public/CNAME` dosyasında: `jarvis.emirhandurmuskaya.com`.
+DNS: alan adı sağlayıcısında `jarvis` için `CNAME` → `emirhandkaya.github.io`.
