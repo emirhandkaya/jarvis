@@ -3,6 +3,8 @@ import { NavBar } from './ui/NavBar'
 import { Page } from './ui/Page'
 import { MenuPage } from './features/menu/MenuPage'
 import { ComingSoon } from './features/placeholder/ComingSoon'
+import { TasksPage } from './features/tasks/TasksPage'
+import { GoalsPage } from './features/goals/GoalsPage'
 import { CheckinPage } from './features/checkin/CheckinPage'
 import { KapanisPage } from './features/checkin/KapanisPage'
 import './styles/ui.css'
@@ -12,8 +14,8 @@ function Screen({ name }: { name: RouteName }) {
     case 'bugun': return <Page title="Bugün"><p class="muted">Bugün ekranı yakında.</p></Page>
     case 'checkin': return <CheckinPage />
     case 'kapanis': return <KapanisPage />
-    case 'gorevler': return <ComingSoon name="Görevler" />
-    case 'hedefler': return <ComingSoon name="Hedefler" />
+    case 'gorevler': return <TasksPage />
+    case 'hedefler': return <GoalsPage />
     case 'menu': return <MenuPage />
     case 'plan': return <ComingSoon name="Plan" />
     case 'odak': return <ComingSoon name="Odak" />
