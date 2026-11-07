@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../schema'
+import type { ActiveTimer } from '../../logic/timer'
 
 export const DEFAULT_SETTINGS = {
   wakeTime: '07:00',
@@ -8,6 +9,7 @@ export const DEFAULT_SETTINGS = {
   cardOrder: [] as string[],
   hiddenCards: [] as string[],
   lastBackupAt: null as string | null,
+  activeTimer: null as ActiveTimer | null,
 }
 export type Settings = typeof DEFAULT_SETTINGS
 
