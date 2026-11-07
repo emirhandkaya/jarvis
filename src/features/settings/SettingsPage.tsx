@@ -7,6 +7,7 @@ import { Page } from '../../ui/Page'
 import { Card } from '../../ui/Card'
 import { Button } from '../../ui/Button'
 import { ShortcutsGuide } from './ShortcutsGuide'
+import { HealthGuide } from './HealthGuide'
 
 type Pending = { file: BackupFile; counts: Record<string, number> }
 
@@ -117,6 +118,7 @@ export function SettingsPage() {
         </Card>
 
         <ShortcutsGuide />
+        <HealthGuide />
       </div>
     </Page>
   )

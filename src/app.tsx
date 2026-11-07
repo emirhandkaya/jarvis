@@ -14,6 +14,7 @@ import { CourseDetail } from './features/study/CourseDetail'
 import { GymPage } from './features/gym/GymPage'
 import { WorkoutPage } from './features/gym/WorkoutPage'
 import { HabitsPage } from './features/habits/HabitsPage'
+import { ImportHealthPage } from './features/health/ImportHealthPage'
 import { TimerTicker } from './features/focus/TimerTicker'
 import { UpdateBanner } from './ui/UpdateBanner'
 import './styles/ui.css'
@@ -36,7 +37,7 @@ function Screen({ route }: { route: Route }) {
     case 'istatistik': return <ComingSoon name="İstatistik" />
     case 'degerlendirme': return <ComingSoon name="Haftalık değerlendirme" />
     case 'ayarlar': return <SettingsPage />
-    case 'importHealth': return <ComingSoon name="Sağlık verisi" />
+    case 'importHealth': return <ImportHealthPage />
   }
 }
 

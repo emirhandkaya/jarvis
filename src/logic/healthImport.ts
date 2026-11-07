@@ -116,7 +116,7 @@ const dayOf = (st: Stamp) => dayKey(st.local - 4 * 3600000)
 // Uyku gecesi: bitis + 6 saatin takvim gunu (uyanma gunu)
 const sleepDayOf = (end: Stamp) => dayKey(end.local + 6 * 3600000)
 
-export function aggregateExportLines(lines: Iterable<string>): HealthPatch[] {
+export function createExportAggregator(): { push(line: string): void; result(): HealthPatch[] } {
   const sums = new Map<string, Partial<Record<'steps' | 'activeKcal', Map<string, number>>>>() // alan -> kaynak -> toplam
   const avgs = new Map<string, Partial<Record<'restingHr' | 'hrvMs', { sum: number; n: number }>>>()
   const sleeps = new Map<string, [number, number][]>()
@@ -134,59 +134,69 @@ export function aggregateExportLines(lines: Iterable<string>): HealthPatch[] {
     HKQuantityTypeIdentifierHeartRateVariabilitySDNN: 'hrvMs',
   }
 
-  for (const line of lines) {
-    if (!line.includes('<Record')) continue
+  const push = (line: string): void => {
+    if (!line.includes('<Record')) return
     const attrs: Record<string, string> = {}
     for (const m of line.matchAll(/(\w+)="([^"]*)"/g)) attrs[m[1]] = m[2]
     const type = attrs.type
-    if (!type) continue
+    if (!type) return
     const start = attrs.startDate ? parseStamp(attrs.startDate) : null
     const end = attrs.endDate ? parseStamp(attrs.endDate) : null
     if (type in SUM_TYPES) {
       const v = toNum(attrs.value)
-      if (!start || v === null) continue
+      if (!start || v === null) return
       const f = SUM_TYPES[type]
       const bySrc = (row(sums, dayOf(start))[f] ??= new Map())
       const src = attrs.sourceName ?? ''
       bySrc.set(src, (bySrc.get(src) ?? 0) + v)
     } else if (type in AVG_TYPES) {
       const v = toNum(attrs.value)
-      if (!start || v === null) continue
+      if (!start || v === null) return
       const r = row(avgs, dayOf(start))
       const f = AVG_TYPES[type]
       const a = (r[f] ??= { sum: 0, n: 0 })
       a.sum += v
       a.n++
     } else if (type === 'HKCategoryTypeIdentifierSleepAnalysis' && (attrs.value ?? '').includes('Asleep')) {
-      if (!start || !end || !(end.abs > start.abs)) continue
+      if (!start || !end || !(end.abs > start.abs)) return
       const list = sleeps.get(sleepDayOf(end)) ?? []
       list.push([start.abs, end.abs])
       sleeps.set(sleepDayOf(end), list)
     }
   }
 
-  const dates = new Set([...sums.keys(), ...avgs.keys(), ...sleeps.keys()])
-  const out: HealthPatch[] = []
-  for (const date of [...dates].sort()) {
-    const raw: Record<string, unknown> = {}
-    const s = sums.get(date)
-    if (s) for (const f of ['steps', 'activeKcal'] as const) if (s[f]) raw[f] = Math.max(...s[f]!.values())
-    const a = avgs.get(date)
-    if (a) for (const f of ['restingHr', 'hrvMs'] as const) if (a[f]) raw[f] = a[f]!.sum / a[f]!.n
-    const iv = sleeps.get(date)
-    if (iv) {
-      iv.sort((x, y) => x[0] - y[0])
-      let total = 0
-      let [cs, ce] = iv[0]
-      for (const [s2, e2] of iv.slice(1)) {
-        if (s2 <= ce) ce = Math.max(ce, e2)
-        else { total += ce - cs; cs = s2; ce = e2 }
+  const result = (): HealthPatch[] => {
+    const dates = new Set([...sums.keys(), ...avgs.keys(), ...sleeps.keys()])
+    const out: HealthPatch[] = []
+    for (const date of [...dates].sort()) {
+      const raw: Record<string, unknown> = {}
+      const s = sums.get(date)
+      if (s) for (const f of ['steps', 'activeKcal'] as const) if (s[f]) raw[f] = Math.max(...s[f]!.values())
+      const a = avgs.get(date)
+      if (a) for (const f of ['restingHr', 'hrvMs'] as const) if (a[f]) raw[f] = a[f]!.sum / a[f]!.n
+      const iv = sleeps.get(date)
+      if (iv) {
+        iv.sort((x, y) => x[0] - y[0])
+        let total = 0
+        let [cs, ce] = iv[0]
+        for (const [s2, e2] of iv.slice(1)) {
+          if (s2 <= ce) ce = Math.max(ce, e2)
+          else { total += ce - cs; cs = s2; ce = e2 }
+        }
+        total += ce - cs
+        raw.sleepMin = total / 60000
       }
-      total += ce - cs
-      raw.sleepMin = total / 60000
+      const { fields } = sanitize(raw)
+      if (Object.keys(fields).length) out.push({ date, ...fields })
     }
-    const { fields } = sanitize(raw)
-    if (Object.keys(fields).length) out.push({ date, ...fields })
+    return out
   }
-  return out
+
+  return { push, result }
+}
+
+export function aggregateExportLines(lines: Iterable<string>): HealthPatch[] {
+  const agg = createExportAggregator()
+  for (const l of lines) agg.push(l)
+  return agg.result()
 }
