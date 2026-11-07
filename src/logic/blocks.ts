@@ -122,3 +122,9 @@ export function suggestSlot(
   }
   return scan(toMin(window.start), toMin(window.end)) ?? scan(DAY_START, DAY_END)
 }
+
+/** Gün-içi dakika; 00:00–04:00 arası önceki günün devamı sayılır (>1440). */
+export function nowMinutes(now: Date): number {
+  const m = now.getHours() * 60 + now.getMinutes()
+  return now.getHours() < 4 ? m + 1440 : m
+}

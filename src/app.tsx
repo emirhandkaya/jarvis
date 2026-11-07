@@ -15,6 +15,7 @@ import { GymPage } from './features/gym/GymPage'
 import { WorkoutPage } from './features/gym/WorkoutPage'
 import { HabitsPage } from './features/habits/HabitsPage'
 import { ImportHealthPage } from './features/health/ImportHealthPage'
+import { PlanPage } from './features/plan/PlanPage'
 import { TimerTicker } from './features/focus/TimerTicker'
 import { UpdateBanner } from './ui/UpdateBanner'
 import './styles/ui.css'
@@ -27,7 +28,7 @@ function Screen({ route }: { route: Route }) {
     case 'gorevler': return <TasksPage />
     case 'hedefler': return <GoalsPage />
     case 'menu': return <MenuPage />
-    case 'plan': return <ComingSoon name="Plan" />
+    case 'plan': return <PlanPage />
     case 'odak': return <FocusPage />
     case 'ders': return <StudyPage />
     case 'dersDetay': return <CourseDetail id={route.params.id} />

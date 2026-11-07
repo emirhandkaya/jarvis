@@ -62,3 +62,27 @@ label.field > span { display: block; color: var(--muted); font-size: .85rem; mar
   padding: 10px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--accent);
   z-index: 60;
 }
+
+/* Plan / zaman blokları */
+.place-tray { margin-bottom: 12px; }
+.chip-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+.chip-scroll .chip { flex: none; white-space: nowrap; }
+.place-hint { margin-top: 6px; font-size: .9rem; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.tl { position: relative; touch-action: pan-y; user-select: none; -webkit-user-select: none; border-top: 1px solid #2a2e38; }
+.tl-anchor { position: absolute; left: 0; width: 1px; height: 1px; pointer-events: none; }
+.tl-hour { position: absolute; left: 0; right: 0; border-top: 1px solid #2a2e38; pointer-events: none; }
+.tl-hour span { position: absolute; top: -9px; left: 0; width: 40px; font-size: .72rem; color: var(--muted); background: var(--bg); }
+.tl-now { position: absolute; left: 40px; right: 0; height: 2px; background: var(--danger); pointer-events: none; z-index: 3; }
+.tl-block {
+  position: absolute; min-height: 0; min-width: 0; padding: 2px 6px; overflow: hidden; text-align: left;
+  display: flex; flex-direction: column; gap: 0; color: var(--text); font-size: .8rem; line-height: 1.2;
+  border: 0; border-left: 4px solid var(--muted); border-radius: 8px; background: color-mix(in srgb, var(--muted) 30%, var(--surface));
+  z-index: 2; cursor: pointer;
+}
+.tl-block .tl-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.tl-block .tl-time { color: var(--muted); font-size: .72rem; }
+.tl-grip { position: absolute; left: 50%; bottom: 3px; width: 24px; height: 3px; margin-left: -12px; border-radius: 2px; background: rgba(255,255,255,.35); }
+.tl-block.blk-ders { border-left-color: var(--ders); background: color-mix(in srgb, var(--ders) 30%, var(--surface)); }
+.tl-block.blk-spor { border-left-color: var(--spor); background: color-mix(in srgb, var(--spor) 28%, var(--surface)); }
+.tl-block.blk-is { border-left-color: var(--is); background: color-mix(in srgb, var(--is) 28%, var(--surface)); }
+.tl-block.is-dragging { touch-action: none; z-index: 4; box-shadow: 0 4px 16px rgba(0,0,0,.5); opacity: .92; }
