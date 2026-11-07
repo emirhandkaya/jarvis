@@ -4,7 +4,8 @@ import type {
   Workout, WorkoutSet, Habit, HabitLog, Block, HealthDay, Review,
 } from './types'
 
-export const SCHEMA_VERSION = 1
+import { SCHEMA_VERSION } from './version'
+export { SCHEMA_VERSION }
 
 export class JarvisDB extends Dexie {
   settings!: Table<Setting, string>
