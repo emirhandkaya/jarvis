@@ -25,6 +25,8 @@ import { todayList } from '../../logic/habits'
 import { isMinimumDay } from '../../logic/checkin'
 import { HabitCheck } from '../habits/HabitCheck'
 import { DELOAD_NOTE } from '../gym/GymPage'
+import { useBlocksOn } from '../../db/repo/blocks'
+import { currentOrNext, nowMinutes, toMin } from '../../logic/blocks'
 
 export interface CardDef { id: string; title: string; Component: () => JSX.Element | null }
 
@@ -191,6 +193,20 @@ function Saglik() {
   return <Card title="Sağlık">{parts.join(' · ')}</Card>
 }
 
+function Blok() {
+  const { now, today } = useNow()
+  const blocks = useBlocksOn(today)
+  if (!blocks) return null
+  const nowMin = nowMinutes(now)
+  const cur = currentOrNext(blocks, nowMin)
+  if (!cur) return null
+  const { block, state } = cur
+  const text = state === 'now'
+    ? `Şimdi: ${block.title} · ${block.start}–${block.end} (${toMin(block.end) - nowMin} dk kaldı)`
+    : `Sıradaki: ${block.title} · ${block.start}`
+  return <Card title="Zaman bloğu" onClick={() => navigate('/plan')}>{text}</Card>
+}
+
 // Sonraki planlar buraya kart ekler.
 export const CARDS: CardDef[] = [
   { id: 'oncelikler', title: 'Öncelikler', Component: Oncelikler },
@@ -202,4 +218,5 @@ export const CARDS: CardDef[] = [
   { id: 'aliskanlik', title: 'Alışkanlıklar', Component: Aliskanlik },
   { id: 'spor', title: 'Spor', Component: Spor },
   { id: 'saglik', title: 'Sağlık', Component: Saglik },
+  { id: 'blok', title: 'Zaman bloğu', Component: Blok },
 ]
