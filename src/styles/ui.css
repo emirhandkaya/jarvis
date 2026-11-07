@@ -47,3 +47,10 @@ label.field > span { display: block; color: var(--muted); font-size: .85rem; mar
 .task-meta { font-size: .75rem; color: var(--muted); }
 .tag-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
 .group-title { font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 18px 0 8px; }
+
+.update-banner {
+  position: fixed; left: 12px; right: 12px; bottom: calc(80px + env(safe-area-inset-bottom));
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--muted);
+  z-index: 50;
+}

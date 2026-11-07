@@ -8,6 +8,7 @@ import { CheckinPage } from './features/checkin/CheckinPage'
 import { SettingsPage } from './features/settings/SettingsPage'
 import { TodayPage } from './features/today/TodayPage'
 import { KapanisPage } from './features/checkin/KapanisPage'
+import { UpdateBanner } from './ui/UpdateBanner'
 import './styles/ui.css'
 
 function Screen({ name }: { name: RouteName }) {
@@ -38,6 +39,7 @@ export function App() {
     <>
       <Screen name={route.name} />
       <NavBar active={route.name} />
+      <UpdateBanner />
     </>
   )
 }
