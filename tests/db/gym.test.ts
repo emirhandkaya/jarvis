@@ -104,3 +104,14 @@ test('weeklyVolume en eski hafta once', async () => {
   await logSet(w2.id, 'e1', 50, 8)
   expect(await weeklyVolume(3, '2026-11-07')).toEqual([0, 600, 400])
 })
+
+test('set sirasi silmeden sonra benzersiz kalir', async () => {
+  const w = await startWorkout('2026-11-07')
+  await logSet(w.id, 'e1', 60, 10)
+  const mid = await logSet(w.id, 'e1', 60, 9)
+  await logSet(w.id, 'e1', 60, 8)
+  await deleteSet(mid.id)
+  await logSet(w.id, 'e1', 60, 7)
+  const orders = (await db.sets.toArray()).map(s => s.order)
+  expect(new Set(orders).size).toBe(orders.length)
+})

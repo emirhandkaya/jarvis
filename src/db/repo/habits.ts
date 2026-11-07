@@ -34,13 +34,15 @@ export async function setHabitStatus(
   status: HabitLog['status'] | null,
 ): Promise<'ok' | 'joker-limit'> {
   return db.transaction('rw', db.habitLogs, async () => {
-    const all = await db.habitLogs.filter(l => l.habitId === habitId).toArray()
-    const existing = all.find(l => l.date === date)
+    const existing = await db.habitLogs.where('[habitId+date]').equals([habitId, date]).first()
     if (status === null) {
       if (existing) await db.habitLogs.delete(existing.id)
       return 'ok' as const
     }
-    if (status === 'joker' && !jokerAvailable(all.filter(l => l.date !== date), date)) return 'joker-limit' as const
+    if (status === 'joker') {
+      const all = await db.habitLogs.filter(l => l.habitId === habitId && l.date !== date).toArray()
+      if (!jokerAvailable(all, date)) return 'joker-limit' as const
+    }
     if (existing) await db.habitLogs.put(touch({ ...existing, status }))
     else await db.habitLogs.add(newRecord({ habitId, date, status }))
     return 'ok' as const

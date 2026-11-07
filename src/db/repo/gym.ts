@@ -70,7 +70,8 @@ export async function startWorkout(date: string, templateId?: string, isDeload =
 
 export async function logSet(workoutId: string, exerciseId: string, weightKg: number, reps: number): Promise<WorkoutSet> {
   return db.transaction('rw', db.sets, async () => {
-    const order = await db.sets.where('workoutId').equals(workoutId).filter(s => s.exerciseId === exerciseId).count()
+    const existing = await db.sets.where('workoutId').equals(workoutId).filter(s => s.exerciseId === exerciseId).toArray()
+    const order = existing.length ? Math.max(...existing.map(s => s.order)) + 1 : 0
     const s: WorkoutSet = newRecord({ workoutId, exerciseId, order, weightKg, reps })
     await db.sets.add(s)
     return s

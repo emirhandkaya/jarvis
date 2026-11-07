@@ -1,5 +1,5 @@
 import type { HealthDay } from '../db/types'
-import { todayStr } from './dates'
+
 
 export type HealthPatch = { date: string } & Partial<Pick<HealthDay, 'sleepMin' | 'steps' | 'activeKcal' | 'restingHr' | 'hrvMs'>>
 
@@ -99,22 +99,33 @@ export function encodeHealthParam(obj: unknown): string {
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
-// "2026-11-07 07:12:00 +0300" -> yerel zaman bilesenleri (ofset yok sayilir)
-function parseLocal(s: string): Date | null {
-  const m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(s)
+interface Stamp { abs: number; local: number } // abs: gercek an (ms), local: yerel duvar saati (UTC gibi kodlanmis ms)
+
+// "2026-11-07 07:12:00 +0300" -> mutlak an + yerel bilesenler
+function parseStamp(s: string): Stamp | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})(?: ([+-])(\d{2})(\d{2}))?/.exec(s)
   if (!m) return null
-  return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6])
+  const local = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6])
+  const off = m[7] ? (m[7] === '-' ? -1 : 1) * (+m[8] * 60 + +m[9]) * 60000 : 0
+  return { abs: local - off, local }
 }
 
+const dayKey = (localMs: number): string => new Date(localMs).toISOString().slice(0, 10)
+// Genel gun: 04:00 baslangici
+const dayOf = (st: Stamp) => dayKey(st.local - 4 * 3600000)
+// Uyku gecesi: bitis + 6 saatin takvim gunu (uyanma gunu)
+const sleepDayOf = (end: Stamp) => dayKey(end.local + 6 * 3600000)
+
 export function aggregateExportLines(lines: Iterable<string>): HealthPatch[] {
-  const sums = new Map<string, Partial<Record<Field, number>>>()
+  const sums = new Map<string, Partial<Record<'steps' | 'activeKcal', Map<string, number>>>>() // alan -> kaynak -> toplam
   const avgs = new Map<string, Partial<Record<'restingHr' | 'hrvMs', { sum: number; n: number }>>>()
+  const sleeps = new Map<string, [number, number][]>()
   const row = <T>(m: Map<string, T>, date: string): T => {
     let r = m.get(date)
     if (!r) { r = {} as T; m.set(date, r) }
     return r
   }
-  const SUM_TYPES: Record<string, Field> = {
+  const SUM_TYPES: Record<string, 'steps' | 'activeKcal'> = {
     HKQuantityTypeIdentifierStepCount: 'steps',
     HKQuantityTypeIdentifierActiveEnergyBurned: 'activeKcal',
   }
@@ -129,37 +140,51 @@ export function aggregateExportLines(lines: Iterable<string>): HealthPatch[] {
     for (const m of line.matchAll(/(\w+)="([^"]*)"/g)) attrs[m[1]] = m[2]
     const type = attrs.type
     if (!type) continue
-    const start = attrs.startDate ? parseLocal(attrs.startDate) : null
-    const end = attrs.endDate ? parseLocal(attrs.endDate) : null
+    const start = attrs.startDate ? parseStamp(attrs.startDate) : null
+    const end = attrs.endDate ? parseStamp(attrs.endDate) : null
     if (type in SUM_TYPES) {
       const v = toNum(attrs.value)
       if (!start || v === null) continue
-      const r = row(sums, todayStr(start))
       const f = SUM_TYPES[type]
-      r[f] = (r[f] ?? 0) + v
+      const bySrc = (row(sums, dayOf(start))[f] ??= new Map())
+      const src = attrs.sourceName ?? ''
+      bySrc.set(src, (bySrc.get(src) ?? 0) + v)
     } else if (type in AVG_TYPES) {
       const v = toNum(attrs.value)
       if (!start || v === null) continue
-      const r = row(avgs, todayStr(start))
+      const r = row(avgs, dayOf(start))
       const f = AVG_TYPES[type]
-      const a = r[f] ?? (r[f] = { sum: 0, n: 0 })
+      const a = (r[f] ??= { sum: 0, n: 0 })
       a.sum += v
       a.n++
     } else if (type === 'HKCategoryTypeIdentifierSleepAnalysis' && (attrs.value ?? '').includes('Asleep')) {
-      if (!start || !end) continue
-      const min = (end.getTime() - start.getTime()) / 60000
-      if (!(min > 0)) continue
-      const r = row(sums, todayStr(end))
-      r.sleepMin = (r.sleepMin ?? 0) + min
+      if (!start || !end || !(end.abs > start.abs)) continue
+      const list = sleeps.get(sleepDayOf(end)) ?? []
+      list.push([start.abs, end.abs])
+      sleeps.set(sleepDayOf(end), list)
     }
   }
 
-  const dates = new Set([...sums.keys(), ...avgs.keys()])
+  const dates = new Set([...sums.keys(), ...avgs.keys(), ...sleeps.keys()])
   const out: HealthPatch[] = []
   for (const date of [...dates].sort()) {
-    const raw: Record<string, unknown> = { ...sums.get(date) }
+    const raw: Record<string, unknown> = {}
+    const s = sums.get(date)
+    if (s) for (const f of ['steps', 'activeKcal'] as const) if (s[f]) raw[f] = Math.max(...s[f]!.values())
     const a = avgs.get(date)
     if (a) for (const f of ['restingHr', 'hrvMs'] as const) if (a[f]) raw[f] = a[f]!.sum / a[f]!.n
+    const iv = sleeps.get(date)
+    if (iv) {
+      iv.sort((x, y) => x[0] - y[0])
+      let total = 0
+      let [cs, ce] = iv[0]
+      for (const [s2, e2] of iv.slice(1)) {
+        if (s2 <= ce) ce = Math.max(ce, e2)
+        else { total += ce - cs; cs = s2; ce = e2 }
+      }
+      total += ce - cs
+      raw.sleepMin = total / 60000
+    }
     const { fields } = sanitize(raw)
     if (Object.keys(fields).length) out.push({ date, ...fields })
   }

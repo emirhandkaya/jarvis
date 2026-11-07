@@ -62,3 +62,32 @@ test('aggregateExportLines', () => {
     { date: '2026-11-07', steps: 1500, sleepMin: 420, restingHr: 62 },
   ])
 })
+
+const sleep = (src: string, s: string, e: string, v = 'HKCategoryValueSleepAnalysisAsleepCore') =>
+  `<Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="${src}" startDate="${s} +0300" endDate="${e} +0300" value="${v}"/>`
+
+test('uyku segmentleri gece boyunca uyanma gunune yazilir', () => {
+  const r = aggregateExportLines([
+    sleep('Watch', '2026-11-06 23:30:00', '2026-11-07 01:00:00'),
+    sleep('Watch', '2026-11-07 01:00:00', '2026-11-07 03:30:00', 'HKCategoryValueSleepAnalysisAsleepDeep'),
+    sleep('Watch', '2026-11-07 03:30:00', '2026-11-07 06:30:00', 'HKCategoryValueSleepAnalysisAsleepREM'),
+  ])
+  expect(r).toEqual([{ date: '2026-11-07', sleepMin: 420 }])
+})
+test('ogle uykusu kendi gunune yazilir', () => {
+  const r = aggregateExportLines([sleep('Watch', '2026-11-07 14:00:00', '2026-11-07 14:30:00')])
+  expect(r).toEqual([{ date: '2026-11-07', sleepMin: 30 }])
+})
+test('iPhone ve Watch ayni gece cakisinca cift sayilmaz', () => {
+  const r = aggregateExportLines([
+    sleep('iPhone', '2026-11-06 23:30:00', '2026-11-07 06:30:00'),
+    sleep('Watch', '2026-11-06 23:30:00', '2026-11-07 06:30:00'),
+  ])
+  expect(r).toEqual([{ date: '2026-11-07', sleepMin: 420 }])
+})
+test('adimlar kaynak basina toplanir, en buyuk kaynak alinir', () => {
+  const step = (src: string, v: number, h: string) =>
+    `<Record type="HKQuantityTypeIdentifierStepCount" sourceName="${src}" startDate="2026-11-07 ${h}:00:00 +0300" endDate="2026-11-07 ${h}:10:00 +0300" value="${v}"/>`
+  const r = aggregateExportLines([step('iPhone', 2000, '08'), step('iPhone', 3000, '09'), step('Watch', 5200, '08')])
+  expect(r).toEqual([{ date: '2026-11-07', steps: 5200 }])
+})
