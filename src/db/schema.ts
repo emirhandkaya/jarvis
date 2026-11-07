@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import type {
   Setting, Checkin, Goal, Task, Course, Topic, FocusSession, Exercise, Template,
-  Workout, WorkoutSet, Habit, HabitLog, Block, HealthDay, Review,
+  Workout, WorkoutSet, Habit, HabitLog, Block, HealthDay, Review, MockExam,
 } from './types'
 
 import { SCHEMA_VERSION } from './version'
@@ -24,10 +24,11 @@ export class JarvisDB extends Dexie {
   blocks!: Table<Block, string>
   health!: Table<HealthDay, string>
   reviews!: Table<Review, string>
+  mockExams!: Table<MockExam, string>
 
   constructor() {
     super('jarvis')
-    this.version(SCHEMA_VERSION).stores({
+    this.version(1).stores({
       settings: 'key',
       checkins: 'date',
       goals: 'id, kind, parentId',
@@ -45,6 +46,7 @@ export class JarvisDB extends Dexie {
       health: 'date',
       reviews: 'weekStart',
     })
+    this.version(2).stores({ mockExams: 'id, courseId, date' })
   }
 }
 

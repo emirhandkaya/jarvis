@@ -126,3 +126,9 @@ export interface Review {
   createdAt: string
   updatedAt: string
 }
+export interface MockExam extends Base {
+  courseId: string
+  date: string
+  score: number
+  notes?: string
+}

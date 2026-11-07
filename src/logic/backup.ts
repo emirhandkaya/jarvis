@@ -10,7 +10,7 @@ export interface BackupFile {
 
 export const TABLE_NAMES = [
   'settings', 'checkins', 'goals', 'tasks', 'courses', 'topics', 'focusSessions', 'exercises',
-  'templates', 'workouts', 'sets', 'habits', 'habitLogs', 'blocks', 'health', 'reviews',
+  'templates', 'workouts', 'sets', 'habits', 'habitLogs', 'blocks', 'health', 'reviews', 'mockExams',
 ] as const
 
 export type BackupResult =
