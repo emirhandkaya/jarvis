@@ -78,7 +78,7 @@ export function BlockSheet({ date, block, initialStart, tasks, courses, onClose,
   const remove = async (scope: 'series' | 'day') => {
     if (!block) return
     await deleteBlock(block.id, scope, date)
-    if (block.repeatDays?.length) onNote(scope === 'day' ? 'Bugünkü blok silindi' : 'Tekrarlayan blok silindi')
+    if (block.repeatDays?.length) onNote(scope === 'day' ? 'Bu günkü blok silindi' : 'Tekrarlayan blok silindi')
     onClose()
   }
 

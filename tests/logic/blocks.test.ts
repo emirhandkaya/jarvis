@@ -1,6 +1,6 @@
 import {
   toMin, toHHMM, snap, blocksForDay, layoutDay, moveBlock, resizeBlock,
-  currentOrNext, capacity, peakWindow, suggestSlot,
+  currentOrNext, capacity, peakWindow, suggestSlot, placeDuration,
 } from '../../src/logic/blocks'
 import type { Block, FocusSession, Task } from '../../src/db/types'
 
@@ -96,4 +96,11 @@ test('suggestSlot', () => {
   expect(suggestSlot(full, 60, win, 360)).toBe('06:00')
   expect(suggestSlot(full, 60, win, 600)).toBe('11:00')
   expect(suggestSlot([blk({ start: '06:00', end: '24:00' })], 60, win, 360)).toBeNull()
+})
+
+test('placeDuration kenetlenir ve 15e yuvarlanir', () => {
+  expect(placeDuration(undefined)).toBe(60)
+  expect(placeDuration(1)).toBe(15)
+  expect(placeDuration(50)).toBe(60)
+  expect(placeDuration(5000)).toBe(1080)
 })

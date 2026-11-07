@@ -128,3 +128,9 @@ export function nowMinutes(now: Date): number {
   const m = now.getHours() * 60 + now.getMinutes()
   return now.getHours() < 4 ? m + 1440 : m
 }
+
+/** Yerleştirilen blok süresi: 15'e yukarı yuvarlanır, [15 dk, tüm gün] aralığına kenetlenir. */
+export function placeDuration(estimateMin: number | undefined): number {
+  const est = estimateMin !== undefined && estimateMin > 0 ? estimateMin : 60
+  return Math.min(DAY_END - DAY_START, Math.max(STEP, Math.ceil(est / STEP) * STEP))
+}

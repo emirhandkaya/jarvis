@@ -1,10 +1,11 @@
 import type { Course, Task } from '../../db/types'
+import { placeDuration } from '../../logic/blocks'
 
 export type PlaceItem = { type: 'task'; task: Task } | { type: 'course'; course: Course }
 
 export const itemId = (i: PlaceItem) => (i.type === 'task' ? i.task.id : i.course.id)
 export const itemTitle = (i: PlaceItem) => (i.type === 'task' ? i.task.title : i.course.name)
-export const itemMinutes = (i: PlaceItem) => (i.type === 'task' ? i.task.estimateMin ?? 60 : 60)
+export const itemMinutes = (i: PlaceItem) => placeDuration(i.type === 'task' ? i.task.estimateMin : undefined)
 export const itemKind = (i: PlaceItem): 'ders' | 'spor' | 'is' =>
   i.type === 'course' ? 'ders' : i.task.tag === 'ders' ? 'ders' : i.task.tag === 'spor' ? 'spor' : 'is'
 

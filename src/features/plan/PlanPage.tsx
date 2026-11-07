@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import type { Block } from '../../db/types'
 import { addBlock, updateBlock, useBlocksOn } from '../../db/repo/blocks'
 import { useTasks } from '../../db/repo/tasks'
@@ -31,6 +31,13 @@ type SheetState = { block?: Block; start?: string } | null
 export function PlanPage() {
   const { now, today } = useNow()
   const [date, setDate] = useState(today)
+  const prevToday = useRef(today)
+  useEffect(() => {
+    if (prevToday.current !== today) {
+      setDate(d => (d === prevToday.current ? today : d))
+      prevToday.current = today
+    }
+  }, [today])
   const [sheet, setSheet] = useState<SheetState>(null)
   const [selected, setSelected] = useState<PlaceItem | null>(null)
   const [note, setNote] = useState('')
@@ -87,7 +94,7 @@ export function PlanPage() {
         <Button variant="ghost" class="grow" onClick={() => setDate(today)} disabled={isToday}>Bugün</Button>
         <Button variant="ghost" aria-label="Sonraki gün" onClick={() => setDate(addDays(date, 1))}>›</Button>
       </div>
-      {cap.over && <p class="note">Bugün {Number((cap.plannedMin / 60).toFixed(1))} saat planladın, gerçekçi mi?</p>}
+      {cap.over && <p class="note">Bugün {(cap.plannedMin / 60).toLocaleString('tr-TR', { maximumFractionDigits: 1 })} saat planladın, gerçekçi mi?</p>}
       {note && <p class="note" role="status">{note}</p>}
       <PlaceTray
         tasks={trayTasks} courses={courses} selected={selected} peak={peak} suggestion={suggestion}

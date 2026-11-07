@@ -5,7 +5,7 @@ import { DAY_END, DAY_START, layoutDay, moveBlock, resizeBlock, toMin } from '..
 const LABEL_W = 44
 const HOLD_MS = 250
 const MOVE_TOLERANCE = 8
-const HANDLE_PX = 12
+const HANDLE_PX = 24
 
 interface Props {
   blocks: Block[]
@@ -77,16 +77,23 @@ function BlockView({ block, col, cols, onEdit, onCommit }: BV) {
   const top = toMin(shown.start) - DAY_START
   const height = Math.max(15, toMin(shown.end) - toMin(shown.start))
 
+  useEffect(() => { setPreview(null) }, [block.start, block.end])
+
   const finish = (commit: boolean) => {
+    let keepPreview = false
     clearTimeout(s.timer)
     if (s.active) {
       s.suppress = true
       setTimeout(() => { s.suppress = false }, 50)
-      if (commit && previewRef.current) onCommit(block, previewRef.current)
+      const p = previewRef.current
+      if (commit && p && (p.start !== block.start || p.end !== block.end)) {
+        onCommit(block, p)
+        keepPreview = true // props güncellenene kadar önizleme kalsın
+      }
     }
     s.active = false
     previewRef.current = null
-    setPreview(null)
+    if (!keepPreview) setPreview(null)
     setDragging(false)
   }
 
@@ -94,7 +101,8 @@ function BlockView({ block, col, cols, onEdit, onCommit }: BV) {
     if (e.button !== 0 && e.pointerType === 'mouse') return
     const node = e.currentTarget as HTMLElement
     const rect = node.getBoundingClientRect()
-    s.mode = e.clientY >= rect.bottom - HANDLE_PX ? 'resize' : 'move'
+    const handle = Math.min(HANDLE_PX, rect.height / 3)
+    s.mode = e.clientY >= rect.bottom - handle ? 'resize' : 'move'
     s.y0 = e.clientY; s.x0 = e.clientX; s.cancelled = false; s.active = false
     const id = e.pointerId
     clearTimeout(s.timer)
@@ -114,6 +122,7 @@ function BlockView({ block, col, cols, onEdit, onCommit }: BV) {
       }
       return
     }
+    if (e.pointerType === 'mouse' && e.buttons === 0) { finish(false); return }
     e.preventDefault()
     const d = e.clientY - s.y0
     const next = s.mode === 'move' ? moveBlock(block, d) : resizeBlock(block, d)
@@ -135,7 +144,7 @@ function BlockView({ block, col, cols, onEdit, onCommit }: BV) {
     >
       <span class="tl-title">{block.title}{block.repeatDays?.length ? ' ↻' : ''}</span>
       {height >= 30 && <span class="tl-time">{shown.start}–{shown.end}</span>}
-      <i class="tl-grip" />
+      {height >= 30 && <i class="tl-grip" />}
     </button>
   )
 }
