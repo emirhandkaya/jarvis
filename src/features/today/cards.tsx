@@ -6,6 +6,16 @@ import { Card } from '../../ui/Card'
 import { TaskRow } from '../tasks/TaskRow'
 import { QuickAdd } from '../tasks/QuickAdd'
 import { useNow } from '../../ui/useNow'
+import { useEffect, useState } from 'preact/hooks'
+import { useDueTopics } from '../../db/repo/topics'
+import { useCourses } from '../../db/repo/courses'
+import { useFocusSessions } from '../../db/repo/focus'
+import { useSettings } from '../../db/repo/settings'
+import { dayMinutes, nearestExam, weekMinutes } from '../../logic/study'
+import { weekStart } from '../../logic/dates'
+import { remainingSec } from '../../logic/timer'
+import { navigate } from '../../router'
+import { ReviewChips } from '../study/ReviewChips'
 
 export interface CardDef { id: string; title: string; Component: () => JSX.Element | null }
 
@@ -66,9 +76,66 @@ function Gunluk() {
   )
 }
 
+function Tekrar() {
+  const { today } = useNow()
+  const due = useDueTopics(today)
+  if (!due || due.length === 0) return null
+  return (
+    <Card title="Bugün tekrar">
+      {due.slice(0, 5).map(({ topic, course }) => (
+        <div key={topic.id} style="margin-bottom: 8px">
+          <div class="row"><span class="tag-dot" style={`background: ${course.color}`} /><span class="grow">{topic.name}</span></div>
+          <ReviewChips topicId={topic.id} today={today} />
+        </div>
+      ))}
+      {due.length > 5 && <p class="muted">+{due.length - 5} konu daha</p>}
+    </Card>
+  )
+}
+
+function Sinav() {
+  const { today } = useNow()
+  const courses = useCourses()
+  const next = nearestExam(courses ?? [], today)
+  if (!next) return null
+  return (
+    <Card title="Sınav" onClick={() => navigate(`/ders/${next.course.id}`)}>
+      {next.course.name} sınavına {next.days} gün
+    </Card>
+  )
+}
+
+const fmtMin = (m: number) => m >= 60 ? `${Math.floor(m / 60)} sa ${m % 60} dk` : `${m} dk`
+
+function Odak() {
+  const { today } = useNow()
+  const sessions = useFocusSessions() ?? []
+  const settings = useSettings()
+  const [now, setNow] = useState(() => new Date())
+  const timer = settings?.activeTimer ?? null
+  useEffect(() => {
+    if (!timer) return
+    const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [!!timer])
+  if (timer && settings) {
+    const s = remainingSec(timer, now, settings.pomodoro)
+    const mmss = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+    return <Card title="Odak" onClick={() => navigate('/odak')}>Odak devam ediyor {mmss}</Card>
+  }
+  return (
+    <Card title="Odak" onClick={() => navigate('/odak')}>
+      Bugün {fmtMin(dayMinutes(sessions, today))} · Bu hafta {fmtMin(weekMinutes(sessions, weekStart(today)))}
+    </Card>
+  )
+}
+
 // Sonraki planlar buraya kart ekler.
 export const CARDS: CardDef[] = [
   { id: 'oncelikler', title: 'Öncelikler', Component: Oncelikler },
   { id: 'gorevler', title: 'Görevler', Component: Gorevler },
   { id: 'gunluk', title: 'Gün özeti', Component: Gunluk },
+  { id: 'tekrar', title: 'Tekrar', Component: Tekrar },
+  { id: 'sinav', title: 'Sınav', Component: Sinav },
+  { id: 'odak', title: 'Odak', Component: Odak },
 ]
