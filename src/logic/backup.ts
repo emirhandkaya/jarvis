@@ -1,5 +1,5 @@
 import { SCHEMA_VERSION } from '../db/version'
-import { diffDays } from './dates'
+import { diffDays, todayStr } from './dates'
 
 export interface BackupFile {
   app: 'jarvis'
@@ -42,5 +42,5 @@ export function backupFileName(date: string): string {
 
 export function needsBackupReminder(lastBackupAt: string | null, today: string): boolean {
   if (!lastBackupAt) return true
-  return diffDays(lastBackupAt.slice(0, 10), today) >= 7
+  return diffDays(todayStr(new Date(lastBackupAt)), today) >= 7
 }

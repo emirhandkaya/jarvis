@@ -13,6 +13,10 @@ test('enerji 2 minimum gün', () => {
   expect(isMinimumDay({ energy: 2 } as Checkin)).toBe(true)
   expect(isMinimumDay({ energy: 3 } as Checkin)).toBe(false)
 })
+test('enerji tanımsızsa minimum gün değil', () => {
+  expect(isMinimumDay({} as Checkin)).toBe(false)
+  expect(isMinimumDay(undefined)).toBe(false)
+})
 test('dünün tomorrowFirst önerisi ilk sırada', () => {
   expect(suggestedPriorities({ tomorrowFirst: 'Fizik' } as Checkin)).toEqual(['Fizik'])
   expect(suggestedPriorities(undefined)).toEqual([])

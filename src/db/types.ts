@@ -5,8 +5,8 @@ export interface Setting { key: string; value: unknown }
 export interface Checkin {
   date: string
   sleepHours?: number
-  energy: number
-  mood: number
+  energy?: number
+  mood?: number
   priorities: string[]
   wins?: string
   learned?: string
