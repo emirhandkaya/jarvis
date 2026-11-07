@@ -13,6 +13,7 @@ import { StudyPage } from './features/study/StudyPage'
 import { CourseDetail } from './features/study/CourseDetail'
 import { GymPage } from './features/gym/GymPage'
 import { WorkoutPage } from './features/gym/WorkoutPage'
+import { HabitsPage } from './features/habits/HabitsPage'
 import { TimerTicker } from './features/focus/TimerTicker'
 import { UpdateBanner } from './ui/UpdateBanner'
 import './styles/ui.css'
@@ -31,7 +32,7 @@ function Screen({ route }: { route: Route }) {
     case 'dersDetay': return <CourseDetail id={route.params.id} />
     case 'spor': return <GymPage />
     case 'sporYeni': return <WorkoutPage />
-    case 'aliskanlik': return <ComingSoon name="Alışkanlıklar" />
+    case 'aliskanlik': return <HabitsPage />
     case 'istatistik': return <ComingSoon name="İstatistik" />
     case 'degerlendirme': return <ComingSoon name="Haftalık değerlendirme" />
     case 'ayarlar': return <SettingsPage />
