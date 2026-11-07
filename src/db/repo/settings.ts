@@ -11,6 +11,8 @@ export const DEFAULT_SETTINGS = {
   lastBackupAt: null as string | null,
   activeTimer: null as ActiveTimer | null,
   lastFocusCourseId: null as string | null,
+  weeklyWorkoutTarget: 3,
+  restSec: 90,
 }
 export type Settings = typeof DEFAULT_SETTINGS
 
