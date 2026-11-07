@@ -8,6 +8,7 @@ import { CheckinPage } from './features/checkin/CheckinPage'
 import { SettingsPage } from './features/settings/SettingsPage'
 import { TodayPage } from './features/today/TodayPage'
 import { KapanisPage } from './features/checkin/KapanisPage'
+import { FocusPage } from './features/focus/FocusPage'
 import { UpdateBanner } from './ui/UpdateBanner'
 import './styles/ui.css'
 
@@ -20,7 +21,7 @@ function Screen({ name }: { name: RouteName }) {
     case 'hedefler': return <GoalsPage />
     case 'menu': return <MenuPage />
     case 'plan': return <ComingSoon name="Plan" />
-    case 'odak': return <ComingSoon name="Odak" />
+    case 'odak': return <FocusPage />
     case 'ders':
     case 'dersDetay': return <ComingSoon name="Ders" />
     case 'spor':

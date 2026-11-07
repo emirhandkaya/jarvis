@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS = {
   hiddenCards: [] as string[],
   lastBackupAt: null as string | null,
   activeTimer: null as ActiveTimer | null,
+  lastFocusCourseId: null as string | null,
 }
 export type Settings = typeof DEFAULT_SETTINGS
 
