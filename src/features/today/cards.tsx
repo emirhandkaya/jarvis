@@ -16,6 +16,14 @@ import { weekStart } from '../../logic/dates'
 import { advance, remainingSec } from '../../logic/timer'
 import { navigate } from '../../router'
 import { ReviewChips } from '../study/ReviewChips'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { useHabitLogs, useHabits } from '../../db/repo/habits'
+import { gymStatus } from '../../db/repo/gym'
+import { useHealth } from '../../db/repo/health'
+import { todayList } from '../../logic/habits'
+import { isMinimumDay } from '../../logic/checkin'
+import { HabitCheck } from '../habits/HabitCheck'
+import { DELOAD_NOTE } from '../gym/GymPage'
 
 export interface CardDef { id: string; title: string; Component: () => JSX.Element | null }
 
@@ -130,6 +138,51 @@ function Odak() {
   )
 }
 
+function Aliskanlik() {
+  const { today } = useNow()
+  const habits = useHabits()
+  const logs = useHabitLogs() ?? []
+  const checkin = useCheckin(today)
+  const list = todayList(habits ?? [], logs, today)
+  if (list.length === 0) return null
+  return (
+    <Card title="Alışkanlıklar">
+      {isMinimumDay(checkin) && <p class="note">Minimum gün: minimum versiyonlar yeterli</p>}
+      {list.map(it => <HabitCheck key={it.habit.id} item={it} today={today} />)}
+    </Card>
+  )
+}
+
+function Spor() {
+  const { today } = useNow()
+  const st = useLiveQuery(() => gymStatus(today), [today])
+  if (!st) return null
+  return (
+    <Card title="Spor">
+      <div>Bu hafta {st.weekCount} / {st.target}</div>
+      {st.todayDone
+        ? <div>Bugün antrenman yapıldı ✓</div>
+        : <a class="btn btn-ghost" href="#/spor/yeni" style="display: inline-block; margin-top: 6px">Antrenmana başla</a>}
+      {st.deload && <p class="note" style="margin: 8px 0 0">{DELOAD_NOTE[st.deload]}</p>}
+    </Card>
+  )
+}
+
+const hm = (min: number) => `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`
+
+function Saglik() {
+  const h = useHealth(useNow().today)
+  if (!h) return null
+  const parts = [
+    h.sleepMin !== undefined && `Uyku ${hm(h.sleepMin)}`,
+    h.steps !== undefined && `${h.steps.toLocaleString('tr-TR')} adım`,
+    h.hrvMs !== undefined && `HRV ${h.hrvMs} ms`,
+    h.restingHr !== undefined && `Nabız ${h.restingHr}`,
+  ].filter(Boolean)
+  if (parts.length === 0) return null
+  return <Card title="Sağlık">{parts.join(' · ')}</Card>
+}
+
 // Sonraki planlar buraya kart ekler.
 export const CARDS: CardDef[] = [
   { id: 'oncelikler', title: 'Öncelikler', Component: Oncelikler },
@@ -138,4 +191,7 @@ export const CARDS: CardDef[] = [
   { id: 'tekrar', title: 'Tekrar', Component: Tekrar },
   { id: 'sinav', title: 'Sınav', Component: Sinav },
   { id: 'odak', title: 'Odak', Component: Odak },
+  { id: 'aliskanlik', title: 'Alışkanlıklar', Component: Aliskanlik },
+  { id: 'spor', title: 'Spor', Component: Spor },
+  { id: 'saglik', title: 'Sağlık', Component: Saglik },
 ]
