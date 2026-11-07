@@ -3,13 +3,15 @@ import { NavBar } from './ui/NavBar'
 import { Page } from './ui/Page'
 import { MenuPage } from './features/menu/MenuPage'
 import { ComingSoon } from './features/placeholder/ComingSoon'
+import { CheckinPage } from './features/checkin/CheckinPage'
+import { KapanisPage } from './features/checkin/KapanisPage'
 import './styles/ui.css'
 
 function Screen({ name }: { name: RouteName }) {
   switch (name) {
     case 'bugun': return <Page title="Bugün"><p class="muted">Bugün ekranı yakında.</p></Page>
-    case 'checkin': return <ComingSoon name="Check-in" />
-    case 'kapanis': return <ComingSoon name="Kapanış" />
+    case 'checkin': return <CheckinPage />
+    case 'kapanis': return <KapanisPage />
     case 'gorevler': return <ComingSoon name="Görevler" />
     case 'hedefler': return <ComingSoon name="Hedefler" />
     case 'menu': return <MenuPage />
