@@ -6,6 +6,7 @@ import { ComingSoon } from './features/placeholder/ComingSoon'
 import { TasksPage } from './features/tasks/TasksPage'
 import { GoalsPage } from './features/goals/GoalsPage'
 import { CheckinPage } from './features/checkin/CheckinPage'
+import { SettingsPage } from './features/settings/SettingsPage'
 import { KapanisPage } from './features/checkin/KapanisPage'
 import './styles/ui.css'
 
@@ -26,7 +27,7 @@ function Screen({ name }: { name: RouteName }) {
     case 'aliskanlik': return <ComingSoon name="Alışkanlıklar" />
     case 'istatistik': return <ComingSoon name="İstatistik" />
     case 'degerlendirme': return <ComingSoon name="Haftalık değerlendirme" />
-    case 'ayarlar': return <ComingSoon name="Ayarlar" />
+    case 'ayarlar': return <SettingsPage />
     case 'importHealth': return <ComingSoon name="Sağlık verisi" />
   }
 }
