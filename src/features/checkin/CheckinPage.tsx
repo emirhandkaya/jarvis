@@ -50,14 +50,14 @@ export function CheckinPage() {
     if (i >= 0) setPrio(i, title)
   }
 
-  const canSave = ready && energy !== undefined && mood !== undefined
+  const canSave = ready && energy !== undefined
   const save = async () => {
     if (!canSave) return
     const n = parseFloat(sleep.replace(',', '.'))
     await saveMorning(today, {
       sleepHours: Number.isFinite(n) ? n : undefined,
       energy: energy!,
-      mood: mood!,
+      mood,
       priorities: prios.map(p => p.trim()).filter(Boolean),
     })
     navigate('#/')

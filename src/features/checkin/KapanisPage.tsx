@@ -11,11 +11,14 @@ export function KapanisPage() {
   const [wins, setWins] = useState('')
   const [learned, setLearned] = useState('')
   const [first, setFirst] = useState('')
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     let alive = true
     db.checkins.get(today).then(c => {
-      if (!alive || !c) return
+      if (!alive) return
+      setReady(true)
+      if (!c) return
       setWins(c.wins ?? '')
       setLearned(c.learned ?? '')
       setFirst(c.tomorrowFirst ?? '')
@@ -31,7 +34,7 @@ export function KapanisPage() {
   const field = (label: string, v: string, set: (s: string) => void) => (
     <label class="field">
       <span>{label}</span>
-      <textarea value={v} onInput={e => set((e.target as HTMLTextAreaElement).value)} />
+      <textarea disabled={!ready} value={v} onInput={e => set((e.target as HTMLTextAreaElement).value)} />
     </label>
   )
 
@@ -40,7 +43,7 @@ export function KapanisPage() {
       {field('Ne iyi gitti?', wins, setWins)}
       {field('Ne öğrendim?', learned, setLearned)}
       {field('Yarın ilk iş?', first, setFirst)}
-      <Button onClick={save}>Kaydet</Button>
+      <Button onClick={save} disabled={!ready}>Kaydet</Button>
     </Page>
   )
 }

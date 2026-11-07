@@ -35,7 +35,7 @@ label.field > span { display: block; color: var(--muted); font-size: .85rem; mar
 .scale button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 .scale-labels { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); margin-top: 4px; }
 .note { background: #2a2433; border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; }
-.chip { display: inline-block; padding: 6px 12px; min-height: 36px; border-radius: 999px; background: var(--bg); border: 1px solid #2a2e38; color: var(--text); font-size: .9rem; }
+.chip { display: inline-block; padding: 6px 12px; min-height: 44px; border-radius: 999px; background: var(--bg); border: 1px solid #2a2e38; color: var(--text); font-size: .9rem; }
 .chip.on { background: var(--accent); border-color: var(--accent); }
 .task-row { display: flex; align-items: center; gap: 4px; background: var(--surface); border-radius: 12px; margin-bottom: 8px; }
 .task-circle { flex: 0 0 44px; background: none; border: 0; padding: 0; display: flex; align-items: center; justify-content: center; }

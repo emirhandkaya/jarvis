@@ -7,7 +7,7 @@ const defined = <T extends object>(o: T): Partial<T> =>
 
 export async function saveMorning(
   date: string,
-  v: { sleepHours?: number; energy: number; mood: number; priorities: string[] },
+  v: { sleepHours?: number; energy: number; mood?: number; priorities: string[] },
 ): Promise<void> {
   const now = new Date().toISOString()
   await db.transaction('rw', db.checkins, async () => {

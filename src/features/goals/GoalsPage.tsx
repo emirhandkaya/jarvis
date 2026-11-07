@@ -69,7 +69,7 @@ export function GoalsPage() {
     <Page title="Hedefler">
       {sections.map(s => (
         <Card key={s.kind} title={s.title}>
-          {s.list.map(g => <GoalItem key={g.id} goal={g} goals={goals} />)}
+          {s.list.map(g => <GoalItem key={g.id} goal={g} goals={all} />)}
           {s.list.length === 0 && <p class="muted" style="margin: 0">Henüz yok.</p>}
           <AddInline kind={s.kind} placeholder={s.placeholder} />
         </Card>
