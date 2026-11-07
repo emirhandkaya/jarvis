@@ -124,4 +124,4 @@ export function focusByHour(sessions: FocusSession[], today: string, days = 30):
 
 export const isBadWeek = (s: WeekSummary): boolean => s.habitRate !== null && s.habitRate < 0.4
 
-export const fmtMin = (m: number): string => (m >= 60 ? `${Math.floor(m / 60)} sa ${m % 60} dk` : `${m} dk`)
+export const fmtMin = (m: number): string => (m >= 60 ? `${Math.floor(m / 60)} sa${m % 60 ? ` ${m % 60} dk` : ""}` : `${m} dk`)

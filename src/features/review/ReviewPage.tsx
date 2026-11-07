@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'preact/hooks'
-import { useReview, saveReview, useReviewWeekStarts } from '../../db/repo/reviews'
+import { useReviewState, saveReview, useReviewWeekStarts } from '../../db/repo/reviews'
 import { useStatsInput } from '../../db/repo/stats'
 import { addGoal, useGoals } from '../../db/repo/goals'
+import type { Review } from '../../db/types'
 import { addDays } from '../../logic/dates'
 import { reviewWeekFor } from '../../logic/review'
 import { isBadWeek, weekSummary, type StatsInput } from '../../logic/stats'
@@ -57,14 +58,21 @@ export function ReviewPage() {
   const starts = useReviewWeekStarts()
   const input = useStatsInput()
   if (!starts || !input) return <Page title="Haftalık değerlendirme" />
-  return <ReviewBody today={today} starts={starts} input={input} />
+  return <ReviewLoader today={today} starts={starts} input={input} />
 }
 
-function ReviewBody({ today, starts, input }: { today: string; starts: string[]; input: StatsInput }) {
+function ReviewLoader({ today, starts, input }: { today: string; starts: string[]; input: StatsInput }) {
   const [target] = useState(() => reviewWeekFor(today, starts))
-  const ws = target.weekStart
-  const saved = useReview(ws)
-  const [editing, setEditing] = useState(target.mode === 'edit')
+  const isView = target.mode === 'view'
+  // Görüntüleme modunda geçen haftanın kaydı gösterilir; bu hafta pazar günü yazılır.
+  const ws = isView ? addDays(target.weekStart, -7) : target.weekStart
+  const state = useReviewState(ws)
+  if (!state) return <Page title="Haftalık değerlendirme" />
+  return <ReviewBody today={today} input={input} ws={ws} isView={isView} saved={state.review} />
+}
+
+function ReviewBody({ today, input, ws, isView, saved }: { today: string; input: StatsInput; ws: string; isView: boolean; saved?: Review }) {
+  const [editing, setEditing] = useState(!isView)
   const [wentWell, setWentWell] = useState('')
   const [toImprove, setToImprove] = useState('')
   const [nextFocus, setNextFocus] = useState('')
@@ -72,7 +80,7 @@ function ReviewBody({ today, starts, input }: { today: string; starts: string[];
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    if (loaded || saved === undefined) return
+    if (loaded || !saved) return
     setWentWell(saved.wentWell)
     setToImprove(saved.toImprove)
     setNextFocus(saved.nextFocus)
@@ -84,7 +92,6 @@ function ReviewBody({ today, starts, input }: { today: string; starts: string[];
   const toggle = (id: string) => setGoalIds(x => (x.includes(id) ? x.filter(y => y !== id) : [...x, id]))
   const save = async () => {
     await saveReview(ws, { wentWell, toImprove, nextFocus, goalIds })
-    alert('Hafta kaydedildi')
     navigate('/')
   }
   const showForm = editing || saved === undefined
@@ -93,6 +100,7 @@ function ReviewBody({ today, starts, input }: { today: string; starts: string[];
     <Page title="Haftalık değerlendirme">
       <div class="stack">
         <p class="muted" style="margin: 0">{weekLabel(ws)}</p>
+        {isView && <p class="note">Bu haftanın değerlendirmesi pazar günü</p>}
         <Card title="Haftanın özeti"><SummaryTiles s={s} compact /></Card>
         {isBadWeek(s) && <RestartCard />}
         {showForm ? (

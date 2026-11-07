@@ -13,8 +13,8 @@ export function reduceTargets(courses: Pick<Course, 'id' | 'weeklyTargetMin'>[],
   return {
     courses: courses.map(c => ({
       id: c.id,
-      weeklyTargetMin: Math.max(30, Math.round((c.weeklyTargetMin * 0.7) / 5) * 5),
+      weeklyTargetMin: Math.min(c.weeklyTargetMin, Math.max(30, Math.round((c.weeklyTargetMin * 0.7) / 5) * 5)),
     })),
-    workoutTarget: Math.max(1, workoutTarget - 1),
+    workoutTarget: Math.min(workoutTarget, Math.max(1, workoutTarget - 1)),
   }
 }

@@ -16,3 +16,9 @@ test('reduceTargets alt sinirlari korur', () => {
   expect(r.workoutTarget).toBe(1)
   expect(reduceTargets([], 4).workoutTarget).toBe(3)
 })
+
+test('reduceTargets hedefi asla yukari cekmez', () => {
+  const r = reduceTargets([{ id: 'a', weeklyTargetMin: 20 }, { id: 'b', weeklyTargetMin: 40 }], 1)
+  expect(r.courses.map(c => c.weeklyTargetMin)).toEqual([20, 30])
+  expect(r.workoutTarget).toBe(1)
+})
