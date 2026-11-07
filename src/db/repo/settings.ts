@@ -1,0 +1,26 @@
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../schema'
+
+export const DEFAULT_SETTINGS = {
+  wakeTime: '07:00',
+  sleepTime: '23:00',
+  pomodoro: { work: 25, short: 5, long: 15, longEvery: 4 },
+  cardOrder: [] as string[],
+  hiddenCards: [] as string[],
+  lastBackupAt: null as string | null,
+}
+export type Settings = typeof DEFAULT_SETTINGS
+
+export async function getSettings(): Promise<Settings> {
+  const rows = await db.settings.toArray()
+  const stored = Object.fromEntries(rows.map(r => [r.key, r.value]))
+  return { ...DEFAULT_SETTINGS, ...stored } as Settings
+}
+
+export async function setSetting<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {
+  await db.settings.put({ key, value })
+}
+
+export function useSettings(): Settings | undefined {
+  return useLiveQuery(() => getSettings(), [])
+}
