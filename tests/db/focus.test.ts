@@ -35,3 +35,8 @@ test('25 dk seans kaydı, recall ve konu aşaması', async () => {
   expect((await db.topics.get(top.id))!.stage).toBe(1)
   expect(await getActiveTimer()).toBeNull()
 })
+test('kapalıyken biten fazlar sayılır: 10:00-10:40 = 35 dk', async () => {
+  await startTimer({ mode: 'pomodoro', topicIds: [] }, at(10, 0))
+  const s = await finishTimer(at(10, 40), { recall: [], ratings: {} })
+  expect(s?.minutes).toBe(35)
+})

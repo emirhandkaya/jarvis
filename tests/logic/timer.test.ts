@@ -43,3 +43,7 @@ test('isStale', () => {
   expect(isStale(base(), at(14, 0))).toBe(false)
   expect(isStale(base(), at(14, 1))).toBe(true)
 })
+test('sıfır süreli faz sonsuz döngüye girmez', () => {
+  const r = advance(base(), at(10, 5), { work: 0, short: 0, long: 0, longEvery: 4 })
+  expect(r.finishedPhases.length).toBe(5)
+})

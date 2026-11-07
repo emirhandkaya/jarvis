@@ -17,7 +17,7 @@ export interface ActiveTimer {
 export const STALE_MS = 4 * 3600 * 1000
 
 export function phaseMinutes(phase: Phase, cfg: PomodoroCfg): number {
-  return cfg[phase]
+  return cfg[phase] > 0 ? cfg[phase] : 1
 }
 
 export function nextPhase(phase: Phase, round: number, cfg: PomodoroCfg): { phase: Phase; round: number } {

@@ -6,7 +6,7 @@ import { getSettings, setSetting } from './settings'
 import { reviewTopic } from './topics'
 import { todayStr } from '../../logic/dates'
 import type { Rating } from '../../logic/spacedReview'
-import { totalWorkSec, type ActiveTimer } from '../../logic/timer'
+import { advance, totalWorkSec, type ActiveTimer } from '../../logic/timer'
 
 export async function getActiveTimer(): Promise<ActiveTimer | null> {
   return (await getSettings()).activeTimer
@@ -52,7 +52,7 @@ export async function finishTimer(
 ): Promise<FocusSession | null> {
   const [t, settings] = await Promise.all([getActiveTimer(), getSettings()])
   if (!t) return null
-  const sec = totalWorkSec(t, now, settings.pomodoro)
+  const sec = totalWorkSec(advance(t, now, settings.pomodoro).timer, now, settings.pomodoro)
   const minutes = Math.round(sec / 60)
   if (sec < 60 || minutes < 1) { await discardTimer(); return null }
   const entries = Object.entries(review.ratings)
@@ -67,10 +67,12 @@ export async function finishTimer(
     recall: review.recall.map(r => r.trim()).filter(Boolean).slice(0, 3),
     ...(entries.length ? { rating: entries[0][1] } : {}),
   }) as FocusSession
-  await db.focusSessions.add(session)
-  const day = todayStr(now)
-  for (const [topicId, rating] of entries) await reviewTopic(topicId, rating, day)
-  await discardTimer()
+  await db.transaction('rw', [db.focusSessions, db.topics, db.courses, db.settings], async () => {
+    await db.focusSessions.add(session)
+    const day = todayStr(now)
+    for (const [topicId, rating] of entries) await reviewTopic(topicId, rating, day)
+    await discardTimer()
+  })
   return session
 }
 
