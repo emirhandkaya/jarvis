@@ -5,9 +5,10 @@ import { todayStr } from '../../logic/dates'
 import { navigate } from '../../router'
 import { Page } from '../../ui/Page'
 import { Button } from '../../ui/Button'
+import { useNow } from '../../ui/useNow'
 
 export function KapanisPage() {
-  const today = todayStr()
+  const { today } = useNow()
   const [wins, setWins] = useState('')
   const [learned, setLearned] = useState('')
   const [first, setFirst] = useState('')
@@ -27,7 +28,7 @@ export function KapanisPage() {
   }, [today])
 
   const save = async () => {
-    await saveEvening(today, { wins: wins.trim(), learned: learned.trim(), tomorrowFirst: first.trim() })
+    await saveEvening(todayStr(), { wins: wins.trim(), learned: learned.trim(), tomorrowFirst: first.trim() })
     navigate('#/')
   }
 

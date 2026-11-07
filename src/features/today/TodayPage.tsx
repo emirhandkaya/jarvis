@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks'
 import { useSettings, setSetting } from '../../db/repo/settings'
 import { useCheckin } from '../../db/repo/checkins'
-import { todayStr } from '../../logic/dates'
+import { useNow } from '../../ui/useNow'
 import { dayPrompt, isMinimumDay } from '../../logic/checkin'
 import { needsBackupReminder } from '../../logic/backup'
 import { orderCards } from '../../logic/cards'
@@ -10,6 +10,11 @@ import { Card } from '../../ui/Card'
 import { Button } from '../../ui/Button'
 import { PromptBanner } from './PromptBanner'
 import { CARDS } from './cards'
+
+function dayDate(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
 
 const ALL_IDS = CARDS.map(c => c.id)
 
@@ -52,8 +57,7 @@ function CardEditor() {
 }
 
 export function TodayPage() {
-  const now = new Date()
-  const today = todayStr(now)
+  const { now, today } = useNow()
   const checkin = useCheckin(today)
   const settings = useSettings()
   const [editing, setEditing] = useState(false)
@@ -61,7 +65,7 @@ export function TodayPage() {
   // Haftalık değerlendirme ekranı Plan 5'te gelecek; şimdilik hep "yapıldı".
   const prompt = dayPrompt(now, checkin, true)
   const ids = orderCards(ALL_IDS, settings?.cardOrder ?? [], settings?.hiddenCards ?? [])
-  const dateLabel = now.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })
+  const dateLabel = dayDate(today).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
     <Page title="Bugün">

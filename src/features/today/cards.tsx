@@ -1,16 +1,16 @@
 import type { JSX } from 'preact'
 import { useCheckin } from '../../db/repo/checkins'
 import { useTasks, toggleDone } from '../../db/repo/tasks'
-import { todayStr } from '../../logic/dates'
 import { todayView } from '../../logic/tasks'
 import { Card } from '../../ui/Card'
 import { TaskRow } from '../tasks/TaskRow'
 import { QuickAdd } from '../tasks/QuickAdd'
+import { useNow } from '../../ui/useNow'
 
 export interface CardDef { id: string; title: string; Component: () => JSX.Element | null }
 
 function Oncelikler() {
-  const today = todayStr()
+  const { today } = useNow()
   const checkin = useCheckin(today)
   const tasks = useTasks()
   const prios = (checkin?.priorities ?? []).filter(p => p.trim())
@@ -18,7 +18,8 @@ function Oncelikler() {
     <Card title="Bugünün öncelikleri">
       {prios.length === 0 && <p class="muted">Check-in'de öncelik seçince burada görünür.</p>}
       {prios.map((p, i) => {
-        const task = tasks?.find(t => t.title === p)
+        const matches = (tasks ?? []).filter(t => t.title === p)
+        const task = matches.find(t => !t.doneAt) ?? matches.find(t => t.plannedDate === today) ?? matches[0]
         const done = !!task?.doneAt
         return (
           <div class="task-row" key={i}>
@@ -35,7 +36,7 @@ function Oncelikler() {
 }
 
 function Gorevler() {
-  const today = todayStr()
+  const { today } = useNow()
   const tasks = useTasks()
   const view = todayView(tasks ?? [], today)
   const open = [...view.overdue, ...view.today]
@@ -52,7 +53,7 @@ function Gorevler() {
 }
 
 function Gunluk() {
-  const c = useCheckin(todayStr())
+  const c = useCheckin(useNow().today)
   const has = c?.energy !== undefined
   return (
     <Card title="Gün özeti">

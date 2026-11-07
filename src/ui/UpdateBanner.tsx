@@ -14,6 +14,12 @@ export function setTimerRunning(running: boolean): void {
 
 export function registerUpdates(): void {
   const update = registerSW({
+    onRegisteredSW(_url, reg) {
+      if (!reg) return
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') void reg.update()
+      })
+    },
     onNeedRefresh() {
       needRefresh = true
       emit()

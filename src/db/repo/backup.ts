@@ -25,14 +25,25 @@ export async function importAll(file: BackupFile): Promise<void> {
 
 export async function downloadBackup(): Promise<void> {
   const file = await exportAll()
-  const blob = new Blob([JSON.stringify(file)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = backupFileName(todayStr())
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
+  const json = JSON.stringify(file)
+  const name = backupFileName(todayStr())
+  const shareFile = new File([json], name, { type: 'application/json' })
+  if (navigator.canShare?.({ files: [shareFile] })) {
+    try {
+      await navigator.share({ files: [shareFile] })
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
+      throw err
+    }
+  } else {
+    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = name
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
   await setSetting('lastBackupAt', new Date().toISOString())
 }

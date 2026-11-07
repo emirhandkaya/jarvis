@@ -14,7 +14,9 @@ export type Settings = typeof DEFAULT_SETTINGS
 export async function getSettings(): Promise<Settings> {
   const rows = await db.settings.toArray()
   const stored = Object.fromEntries(rows.map(r => [r.key, r.value]))
-  return { ...DEFAULT_SETTINGS, ...stored } as Settings
+  const merged = { ...DEFAULT_SETTINGS, ...stored } as Settings
+  merged.pomodoro = { ...DEFAULT_SETTINGS.pomodoro, ...(stored.pomodoro as object | undefined) }
+  return merged
 }
 
 export async function setSetting<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {

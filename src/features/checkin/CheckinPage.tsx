@@ -9,12 +9,13 @@ import { navigate } from '../../router'
 import { Page } from '../../ui/Page'
 import { Button } from '../../ui/Button'
 import { Scale } from '../../ui/Scale'
+import { useNow } from '../../ui/useNow'
 
 const SLOTS = 3
 const roundHalf = (n: number) => Math.round(n * 2) / 2
 
 export function CheckinPage() {
-  const today = todayStr()
+  const { today } = useNow()
   const tasks = useTasks()
   const [sleep, setSleep] = useState('')
   const [energy, setEnergy] = useState<number>()
@@ -54,7 +55,7 @@ export function CheckinPage() {
   const save = async () => {
     if (!canSave) return
     const n = parseFloat(sleep.replace(',', '.'))
-    await saveMorning(today, {
+    await saveMorning(todayStr(), {
       sleepHours: Number.isFinite(n) ? n : undefined,
       energy: energy!,
       mood,
