@@ -1,4 +1,4 @@
-import { emptyStatsInput, weekSummary, weekHabitRate, focusByHour, isBadWeek, trend, type StatsInput } from '../../src/logic/stats'
+import { emptyStatsInput, fmtMin, weekSummary, weekHabitRate, focusByHour, isBadWeek, trend, type StatsInput } from '../../src/logic/stats'
 import type { FocusSession, Habit, HabitLog } from '../../src/db/types'
 
 const iso = (y: number, m: number, d: number, h = 12, mi = 0) => new Date(y, m - 1, d, h, mi).toISOString()
@@ -76,4 +76,10 @@ test('isBadWeek esigi', () => {
   expect(isBadWeek({ ...base, habitRate: 0.39 })).toBe(true)
   expect(isBadWeek({ ...base, habitRate: 0.4 })).toBe(false)
   expect(isBadWeek(base)).toBe(false)
+})
+
+test('fmtMin', () => {
+  expect(fmtMin(60)).toBe('1 sa')
+  expect(fmtMin(380)).toBe('6 sa 20 dk')
+  expect(fmtMin(45)).toBe('45 dk')
 })

@@ -34,7 +34,7 @@ export function StatsPage() {
   const series: [string, number[]][] = [
     ['Odak', tr.map(w => w.focusMin)],
     ['Antrenman', tr.map(w => w.workouts)],
-    ['Alışkanlık', tr.map(w => (w.habitRate ?? 0) * 100)],
+    ['Alışkanlık', tr.filter(w => w.habitRate !== null).map(w => w.habitRate! * 100)],
   ]
 
   return (

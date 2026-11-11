@@ -21,7 +21,7 @@ export function buildDayRecords(input: StatsInput, today: string, days = 60): Da
   const checkins = new Map(input.checkins.map(c => [c.date, c]))
   const health = new Map(input.health.map(h => [h.date, h]))
   return Array.from({ length: days }, (_, i) => {
-    const date = addDays(today, -(days - 1 - i))
+    const date = addDays(today, -(days - i))
     const c = checkins.get(date)
     const h = health.get(date)
     const sleepH = h?.sleepMin !== undefined ? h.sleepMin / 60 : c?.sleepHours

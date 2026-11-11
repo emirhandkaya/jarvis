@@ -21,6 +21,10 @@ export function useReview(ws: string): Review | undefined {
   return useLiveQuery(() => db.reviews.get(ws), [ws])
 }
 
+export function useReviewState(ws: string): { review?: Review } | undefined {
+  return useLiveQuery(async () => ({ review: await db.reviews.get(ws) }), [ws])
+}
+
 export async function isWeekReviewed(date: string): Promise<boolean> {
   return (await db.reviews.get(weekStart(date))) !== undefined
 }

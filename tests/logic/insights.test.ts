@@ -38,3 +38,8 @@ test('buildDayRecords bos girdi', () => {
   expect(r).toHaveLength(60)
   expect(r.every(x => x.focusMin === 0 && !x.workout)).toBe(true)
 })
+
+test('buildDayRecords dune kadar uzanir, bugunu icermez', () => {
+  const r = buildDayRecords(emptyStatsInput(), '2026-11-08', 60)
+  expect(r[r.length - 1].date).toBe('2026-11-07')
+})
